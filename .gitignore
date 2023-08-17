@@ -1,0 +1,8 @@
+# Project exclude paths
+/api-gateway/target/
+/auth-service/target/
+/chat-service/target/
+/common/target/
+/dating-telegram/target/
+/discovery-server/target/
+/social-medial/target/
