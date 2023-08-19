@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="auth-service" />
         <module name="discovery-server" />
+        <module name="keycloak-service" />
         <module name="common" />
         <module name="api-gateway" />
         <module name="chat-service" />
@@ -32,6 +33,7 @@
       <module name="dating-telegram" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
       <module name="inventory-service" options="-parameters" />
+      <module name="keycloak-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
       <module name="order-service" options="-parameters" />
       <module name="product-service" options="-parameters" />

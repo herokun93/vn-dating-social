@@ -101,7 +101,7 @@ public class KeycloakUserService {
 
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(createUserDto.getPassword());
+//        credential.setValue(createUserDto.getPassword());
 
 
 
@@ -120,7 +120,7 @@ public class KeycloakUserService {
 
 
         LoginDto loginDto = new LoginDto();
-        loginDto.setPassword(createUserDto.getPassword());
+//        loginDto.setPassword(createUserDto.getPassword());
         loginDto.setUsername(createUserDto.getUsername());
 
         AccessTokenResponse accessTokenResponse = login(loginDto);
@@ -152,7 +152,7 @@ public class KeycloakUserService {
 
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(createUserDto.getPassword());
+//        credential.setValue(createUserDto.getPassword());
 
         keyCloakUser.setCredentials(Collections.singletonList(credential));
 

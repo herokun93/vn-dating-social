@@ -29,4 +29,14 @@ public class UserCustom {
         if(this.roles.size()==0) return false;
         return true;
     }
+    public boolean hasRoles() {
+        return !roles.isEmpty();
+    }
+    public boolean isRole(String role){
+        for(int index =0;index<roles.size();index++){
+            if(roles.get(index).compareTo(role)==0){
+                return true;
+            }
+        }return false;
+    }
 }
