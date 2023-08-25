@@ -144,7 +144,7 @@ public class AuthService {
         userCustom.setRoles(roles);
 
         if(!userCustom.isRole(role))  throw new AuthenticationTokenForbidden("You are not "+ role);
-        
+
         return  userCustom;
 
     }

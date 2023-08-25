@@ -36,7 +36,7 @@ public class GatewayController {
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public String login(Principal principal){
-//        System.out.println(principal.getName());
+        System.out.println(principal.getName());
         return "gateway";
     }
 

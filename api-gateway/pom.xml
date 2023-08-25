@@ -134,8 +134,14 @@
             <artifactId>keycloak-spring-security-adapter</artifactId>
             <version>${version.keycloak}</version>
         </dependency>
+        <dependency>
+            <groupId>vn.framework.core</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
-<!--        <dependency>-->
+        <!--        <dependency>-->
 <!--            <groupId>org.keycloak</groupId>-->
 <!--            <artifactId>keycloak-core</artifactId>-->
 <!--            <version>${version.keycloak}</version>-->

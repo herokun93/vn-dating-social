@@ -51,6 +51,7 @@ public class AuthService {
     }
 
     private List<String> roles(JwtAuthenticationToken authenticationToken){
+
         Jwt jwt = authenticationToken.getToken();
 
         List<String> realmAccess = jwt.getClaimAsStringList("realm_access");
