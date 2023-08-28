@@ -7,6 +7,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.AbstractEnvironment;
+import org.springframework.web.client.RestTemplate;
 //import vn.dating.app.gateway.configs.KeycloakEventListener;
 
 @SpringBootApplication
@@ -16,6 +17,11 @@ public class ApiGatewayApplication {
         System.setProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "multipledatasources");
 
         SpringApplication.run(ApiGatewayApplication.class, args);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
 

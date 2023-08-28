@@ -14,6 +14,7 @@
         <module name="chat-service" />
         <module name="social-medial" />
         <module name="dating-telegram" />
+        <module name="social-media" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -37,6 +38,7 @@
       <module name="notification-service" options="-parameters" />
       <module name="order-service" options="-parameters" />
       <module name="product-service" options="-parameters" />
+      <module name="social-media" options="-parameters" />
       <module name="social-medial" options="-parameters" />
       <module name="vn.dating.common" options="-parameters" />
     </option>

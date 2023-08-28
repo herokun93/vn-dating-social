@@ -25,6 +25,7 @@
         <module>common</module>
         <module>auth-service</module>
         <module>keycloak-service</module>
+        <module>social-media</module>
     </modules>
 
     <properties>

@@ -1,40 +1,71 @@
 package vn.dating.app.gateway.controllers;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.representations.AccessTokenResponse;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-import vn.dating.app.gateway.dto.AuthRefreshToken;
-import vn.dating.app.gateway.dto.CreateUserDto;
-import vn.dating.app.gateway.dto.LoginDto;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import vn.dating.app.gateway.models.social.User;
 import vn.dating.app.gateway.services.AuthService;
-import vn.dating.app.gateway.services.KeycloakUserService;
-import vn.dating.app.gateway.services.UserService;
-import vn.dating.app.gateway.utils.UserCustom;
+import vn.dating.common.dto.CreateUserDto;
+import vn.dating.common.response.CreateAuthResponse;
 
 import javax.validation.Valid;
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 
-//@RestController
-//@RequestMapping("/api/auth")
-//@RequiredArgsConstructor
-//@Slf4j
-//public class AuthController {
+@Slf4j
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/gateway/auth")
+public class AuthController {
+
+
+    private AuthService authService;
+    private final WebClient webClient;
+
+    private final String SOCIAL_AUTH_CREATE = "http://localhost:2007";
+    @Autowired
+    public AuthController(AuthService authService, WebClient.Builder webClientBuilder) {
+        this.authService = authService;
+        this.webClient = webClientBuilder.baseUrl(SOCIAL_AUTH_CREATE).build();
+    }
+
+
+
+    @PostMapping("/create")
+    public ResponseEntity<CreateAuthResponse> createUser(@Valid @RequestBody CreateUserDto createUserDto){
+        User saveUser = authService.createGatewayUser(createUserDto);
+
+//        WebClient client = WebClient.builder()
+//                .baseUrl(SOCIAL_AUTH_CREATE)
+//                .build();
+
+         CreateAuthResponse createAuthResponse = webClient.post()
+                .uri("/api/social/auth/create")
+                .body(Mono.just(createUserDto), CreateUserDto.class)
+                .retrieve()
+                .bodyToMono(CreateAuthResponse.class)
+                .block(); // Blocking approach for demonstration
+
+
+        if(saveUser==null)   return ResponseEntity.badRequest().body(new CreateAuthResponse("Cannot save user", "GATEWAY"));
+
+        return ResponseEntity.ok().body(new CreateAuthResponse("User created, data saved, and API called", "SOCIAL"));
+    }
+
+
+
+
+
+
+
+
 //
 //    @Autowired
 //    private UserService userService;
@@ -154,4 +185,6 @@ import java.util.stream.Collectors;
 //        log.info(createUserDto.toString());
 //        return  new ResponseEntity<>(createUserDto.toString(),HttpStatus.OK);
 //    }
-//}
+
+
+}

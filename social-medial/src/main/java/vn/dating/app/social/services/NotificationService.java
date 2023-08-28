@@ -36,8 +36,8 @@ public class NotificationService {
 
 
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+//    @Autowired
+//    private SimpMessagingTemplate messagingTemplate;
 
 //    public void sendNotification(Notification notification, NotificationDto notificationDto) {
 //
@@ -119,7 +119,7 @@ public class NotificationService {
 
 
             for(int i=1;i<userIds.size();i++){
-                messagingTemplate.convertAndSendToUser(userIds.get(i),"/topic/notifications", notificationDataDto);
+//                messagingTemplate.convertAndSendToUser(userIds.get(i),"/topic/notifications", notificationDataDto);
             }
 
         }

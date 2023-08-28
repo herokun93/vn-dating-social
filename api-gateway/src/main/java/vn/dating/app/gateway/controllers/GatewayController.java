@@ -7,29 +7,32 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import vn.dating.app.gateway.dto.CreateUserDto;
-import vn.dating.app.gateway.services.KeycloakUserService;
+import vn.dating.app.gateway.services.AuthService;
+import vn.dating.common.dto.CreateUserDto;
+import vn.dating.app.gateway.models.social.User;
+//import vn.dating.app.gateway.services.KeycloakUserService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 
+import javax.validation.Valid;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.security.Principal;
 import java.time.Duration;
 
 @RestController
-@RequestMapping("/api/gateway")
+@RequestMapping("/api/gateway/abc")
 @RequiredArgsConstructor
+@Slf4j
 public class GatewayController {
 
+//    @Autowired
+//    private KeycloakUserService keycloakUserService;
+
     @Autowired
-    private KeycloakUserService keycloakUserService;
+    private AuthService authService;
 
 //
 
@@ -38,6 +41,28 @@ public class GatewayController {
     public String login(Principal principal){
         System.out.println(principal.getName());
         return "gateway";
+    }
+
+    @GetMapping("/public")
+    @ResponseStatus(HttpStatus.OK)
+    public String getPublic(){
+        return "gateway-public";
+    }
+
+    @PostMapping("/auth/create")
+    public ResponseEntity createUser(@Valid @RequestBody CreateUserDto createUserDto){
+
+        User saveUser = authService.createGatewayUser(createUserDto);
+        if(saveUser==null) return  ResponseEntity.badRequest().body("Cannot save");
+
+        return ResponseEntity.ok().body("Created");
+    }
+
+
+    @GetMapping("/private")
+    @ResponseStatus(HttpStatus.OK)
+    public String getPrivate(){
+        return "gateway-private";
     }
 
 

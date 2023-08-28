@@ -1,4 +1,4 @@
-package vn.dating.app.gateway.dto;
+package vn.dating.common.dto;
 
 import lombok.*;
 import javax.validation.constraints.Email;
