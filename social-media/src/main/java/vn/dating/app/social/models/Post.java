@@ -7,16 +7,12 @@ import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import vn.dating.app.social.models.eenum.PostStatus;
+import vn.dating.app.social.models.eenum.PostType;
 import vn.dating.common.models.audit.DateAudit;
 
-
-
-import javax.persistence.Entity;
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import java.util.UUID;
 
 @Entity
@@ -57,11 +53,21 @@ public class Post extends DateAudit {
     @Fetch(FetchMode.SELECT)
     private Set<Like> likes;
 
+    @Enumerated(EnumType.STRING)
+    private PostType type;
 
     @Enumerated(EnumType.STRING)
     private PostStatus state;
 
-    private boolean anonymous;
+    boolean anonymous;
+
+    @ManyToOne
+    @JoinColumn(name = "community_id")
+    private Community community;
+
+    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL)
+    private Set<Post> posts = new HashSet<>();
+
 
     @PrePersist
     public void prePersist() {

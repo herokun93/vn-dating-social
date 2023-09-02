@@ -1,14 +1,12 @@
 package vn.dating.app.social.models;
 
-import lombok.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import vn.dating.common.models.audit.DateAudit;
 
-
-import javax.persistence.Entity;
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @NoArgsConstructor

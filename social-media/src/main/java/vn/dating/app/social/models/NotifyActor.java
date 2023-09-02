@@ -3,10 +3,7 @@ package vn.dating.app.social.models;
 import lombok.*;
 import vn.dating.common.models.audit.DateAudit;
 
-
-import javax.persistence.Entity;
 import javax.persistence.*;
-
 import java.time.Instant;
 
 @Entity

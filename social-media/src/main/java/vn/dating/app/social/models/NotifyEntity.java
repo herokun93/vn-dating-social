@@ -6,12 +6,9 @@ import org.hibernate.annotations.FetchMode;
 import vn.dating.app.social.models.eenum.NotificationType;
 import vn.dating.common.models.audit.DateAudit;
 
-
-import javax.persistence.Entity;
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Data

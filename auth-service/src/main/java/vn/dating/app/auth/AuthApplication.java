@@ -19,19 +19,4 @@ public class AuthApplication {
         return new RestTemplate();
     }
 
-//    @Bean
-//    @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-//    public AccessToken getAccessToken() {
-//        return ((KeycloakPrincipal) getRequest().getUserPrincipal()).getKeycloakSecurityContext().getToken();
-//    }
-//
-//    @Bean
-//    @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-//    public KeycloakSecurityContext getKeycloakSecurityContext() {
-//        return ((KeycloakPrincipal) getRequest().getUserPrincipal()).getKeycloakSecurityContext();
-//    }
-//
-//    private HttpServletRequest getRequest() {
-//        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-//    }
 }

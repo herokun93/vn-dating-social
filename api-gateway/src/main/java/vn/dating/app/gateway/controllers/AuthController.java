@@ -41,6 +41,7 @@ public class AuthController {
     @PostMapping("/create")
     public ResponseEntity<CreateAuthResponse> createUser(@Valid @RequestBody CreateUserDto createUserDto){
         User saveUser = authService.createGatewayUser(createUserDto);
+        log.info("Create new user");
 
 //        WebClient client = WebClient.builder()
 //                .baseUrl(SOCIAL_AUTH_CREATE)

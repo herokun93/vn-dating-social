@@ -6,12 +6,8 @@ import lombok.Setter;
 import lombok.ToString;
 import vn.dating.common.models.audit.DateAudit;
 
-import java.util.Set;
-
-
-
-import javax.persistence.Entity;
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table
@@ -39,11 +35,11 @@ public class Reply extends DateAudit {
     @OneToMany(mappedBy = "reply",fetch = FetchType.EAGER)
     private Set<Like> likes;
 
+    boolean anonymous;
 
 
     @OneToOne(mappedBy = "reply")
     private Media media;
 
-    private boolean anonymous;
 }
 

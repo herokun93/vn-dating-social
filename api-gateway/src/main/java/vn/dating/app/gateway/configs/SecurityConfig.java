@@ -4,6 +4,7 @@ package vn.dating.app.gateway.configs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
@@ -32,6 +33,8 @@ import org.springframework.security.web.server.authorization.AuthorizationContex
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 
 @EnableWebFluxSecurity
@@ -79,13 +82,20 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                                 .pathMatchers("/api/auth/login").permitAll()
                                 .pathMatchers("/api/auth/verify/**").permitAll()
                                 .pathMatchers("/api/gateway/public").permitAll()
+                                .pathMatchers("/api/gateway/gateway/**").permitAll()
                                 .pathMatchers("/api/gateway/private").authenticated()
                                 .pathMatchers("/api/gateway/auth/create").permitAll()
                                 .pathMatchers("/api/social/auth/create").permitAll()
+                                .pathMatchers("/api/social/auth/public").permitAll()
+                                .pathMatchers("/api/social/posts/create").access(this::isRoleUser)
+                                .pathMatchers("/api/social/posts/upload/**").permitAll()
+                                .pathMatchers("/api/social/media/**").permitAll()
+                                .pathMatchers("/api/social/communities/**").permitAll()
+                                .pathMatchers("/api/social/posts/public").permitAll()
+                                .pathMatchers("/api/social/public").permitAll()
                                 .pathMatchers("/api/auth/private").access(this::isRoleUser)
                                 .pathMatchers("/api/v1/social/users/public").permitAll()
                                 .pathMatchers("/api/v1/social/users/private").access(this::isRoleUser)
-                                .pathMatchers("/api/social/public").permitAll()
                                 .pathMatchers("/api/social/private").access(this::isRoleUser)
                                 .pathMatchers("/api/auth/public").permitAll()
                                // .pathMatchers("/api/auth/public").access(this::currentUserMatchesPath)
@@ -124,7 +134,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             List<String> roles = getRolesFromJwt(jwt);
             boolean hasUserRole = roles
                     .stream()
-                    .anyMatch(role -> role.equals(ROLE_PREFIX + checkRole)); // Change to your actual role name
+                    .anyMatch(role -> role.equals(checkRole)); // Change to your actual role name
             return Mono.just(new AuthorizationDecision(hasUserRole));
         }
         return Mono.just(new AuthorizationDecision(false));
@@ -142,6 +152,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                 if (rolesNode != null && rolesNode.isArray() && rolesNode.size() > 0) {
                     for (JsonNode roleNode : rolesNode) {
                         roles.add(roleNode.asText());
+                        System.out.println( roleNode.asText());
                     }
                 }
             } catch (IOException e) {

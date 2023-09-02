@@ -5,8 +5,6 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import vn.dating.common.models.audit.DateAudit;
 
-
-import javax.persistence.Entity;
 import javax.persistence.*;
 import java.util.Set;
 
@@ -37,6 +35,8 @@ public class Comment  extends DateAudit {
     @JoinColumn(name = "comment_id")
     private Media media;
 
+    boolean anonymous;
+
 
 
     @OneToMany(mappedBy = "comment",fetch = FetchType.EAGER)
@@ -47,6 +47,4 @@ public class Comment  extends DateAudit {
 //    @OrderColumn(name = "reply_id")
     @Fetch(FetchMode.SELECT)
     private Set<Reply> replies;
-
-    private boolean anonymous;
 }

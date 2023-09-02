@@ -23,7 +23,7 @@ import java.security.Principal;
 import java.time.Duration;
 
 @RestController
-@RequestMapping("/api/gateway/abc")
+@RequestMapping("/api/gateway/gateway")
 @RequiredArgsConstructor
 @Slf4j
 public class GatewayController {
@@ -36,26 +36,12 @@ public class GatewayController {
 
 //
 
-    @GetMapping()
-    @ResponseStatus(HttpStatus.OK)
-    public String login(Principal principal){
-        System.out.println(principal.getName());
-        return "gateway";
-    }
+
 
     @GetMapping("/public")
     @ResponseStatus(HttpStatus.OK)
     public String getPublic(){
         return "gateway-public";
-    }
-
-    @PostMapping("/auth/create")
-    public ResponseEntity createUser(@Valid @RequestBody CreateUserDto createUserDto){
-
-        User saveUser = authService.createGatewayUser(createUserDto);
-        if(saveUser==null) return  ResponseEntity.badRequest().body("Cannot save");
-
-        return ResponseEntity.ok().body("Created");
     }
 
 
@@ -66,22 +52,12 @@ public class GatewayController {
     }
 
 
-    @GetMapping("/login")
-    @ResponseStatus(HttpStatus.OK)
-    public String getToken(Principal principal){
-        System.out.println("Handler");
-        if(principal==null){
-            return "principal is null";
-        }
-        System.out.println(principal.getName());
-//        System.out.println(principal.getName());
-        return principal.getName();
-    }
 
 
-    @PostMapping(path = "/upload")
-    public String upload(@RequestPart("files") Flux<FilePart> files){
+    @PostMapping(value = "/upload")
+    public String upload(@RequestPart("files") Flux<FilePart> files,@RequestPart("name") String name){
         System.out.println("upload file");
+        System.out.println(name);
         files.subscribe(filePart -> {
             String originalFilename = filePart.filename();
             long size = filePart.headers().getContentLength();

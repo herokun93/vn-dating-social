@@ -5,8 +5,6 @@ import vn.dating.app.social.models.eenum.LikeModeType;
 import vn.dating.app.social.models.eenum.ReactType;
 import vn.dating.common.models.audit.DateAudit;
 
-
-import javax.persistence.Entity;
 import javax.persistence.*;
 
 

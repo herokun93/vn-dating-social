@@ -23,6 +23,12 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @GetMapping("/public")
+    @ResponseStatus(HttpStatus.OK)
+    public String getPublic(){
+        return "public";
+    }
+
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<CreateAuthResponse> createUser(@Valid @RequestBody CreateUserDto createUserDto){

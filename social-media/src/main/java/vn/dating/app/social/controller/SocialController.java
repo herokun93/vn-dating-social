@@ -17,35 +17,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/social")
+@RequestMapping("/api/social/post")
 @RequiredArgsConstructor
 @Slf4j
 public class SocialController {
-    @GetMapping("/public")
-    @ResponseStatus(HttpStatus.OK)
-    public String getPublic(){
-        return "public";
-    }
-
-    @GetMapping("/private")
-    @ResponseStatus(HttpStatus.OK)
-    public String getPrivate(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        List<String> roles = authentication.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        if (authentication instanceof JwtAuthenticationToken) {
-            JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
-            Jwt jwt = jwtAuthenticationToken.getToken();
-
-            log.info( jwt.getClaimAsStringList("realm_access").toString());
-        }
-
-
-
-        return "Logged in as: " + authentication.getName() + "\nRoles: " + roles;
-    }
+//    @GetMapping("/public")
+//    @ResponseStatus(HttpStatus.OK)
+//    public String getPublic(){
+//        return "public";
+//    }
+//
+//    @GetMapping("/private")
+//    @ResponseStatus(HttpStatus.OK)
+//    public String getPrivate(){
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        List<String> roles = authentication.getAuthorities()
+//                .stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .collect(Collectors.toList());
+//
+//        if (authentication instanceof JwtAuthenticationToken) {
+//            JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+//            Jwt jwt = jwtAuthenticationToken.getToken();
+//
+//            log.info( jwt.getClaimAsStringList("realm_access").toString());
+//        }
+//
+//
+//
+//        return "Logged in as: " + authentication.getName() + "\nRoles: " + roles;
+//    }
 }

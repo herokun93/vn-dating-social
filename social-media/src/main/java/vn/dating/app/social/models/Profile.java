@@ -3,10 +3,8 @@ package vn.dating.app.social.models;
 import lombok.*;
 import vn.dating.common.models.audit.DateAudit;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 import javax.persistence.*;
+
 
 @Entity
 @Table
@@ -31,8 +29,6 @@ public class Profile extends DateAudit {
 
     @OneToOne(mappedBy = "profile",fetch = FetchType.LAZY)
     private User user;
-
-    private boolean anonymous;
 
 
 }
