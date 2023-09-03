@@ -1,6 +1,7 @@
 package vn.dating.app.social.dto.community;
 
 import lombok.*;
+import vn.dating.app.social.models.eenum.CommunityType;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -21,4 +22,7 @@ public class CommunityNewDto {
     @NotBlank(message = "Description cannot be blank")
     @Size(max = 1000, message = "Description must be less than or equal to 1000 characters")
     private String description;
+    private CommunityType type;
+    private boolean approval;
+
 }

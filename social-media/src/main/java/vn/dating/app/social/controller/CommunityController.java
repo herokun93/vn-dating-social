@@ -11,8 +11,12 @@ import vn.dating.app.social.dto.community.*;
 import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.User;
 import vn.dating.app.social.models.UserCommunity;
+import vn.dating.app.social.models.eenum.CommunityType;
+import vn.dating.app.social.models.eenum.UserCommunityRoleType;
+import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.app.social.services.AuthService;
 import vn.dating.app.social.services.CommunityService;
+import vn.dating.app.social.services.PostService;
 import vn.dating.app.social.services.UserCommunityService;
 
 import javax.validation.Valid;
@@ -28,6 +32,9 @@ public class CommunityController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private PostService postService;
 
 
 
@@ -74,7 +81,7 @@ public class CommunityController {
             Community community = communityOptional.get();
             long communityId  = community.getId();
 
-            boolean check = userCommunityService.doesUserCommunityExist(user.getId(), communityId);
+            boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityId(user.getId(), communityId);
             if(check){
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new ResponseObject("OK", ResponseMessage.EXISTS, CommunityResultDto.fromEntity(community))
@@ -85,11 +92,28 @@ public class CommunityController {
             UserCommunity userCommunity = new UserCommunity();
             userCommunity.setUser(user);
             userCommunity.setCommunity(community);
-            userCommunity.setActive(true);
+
+            CommunityType communityType = community.getType();
+
+            boolean checkCommunityType = (communityType == CommunityType.PRIVATE || communityType ==CommunityType.PROTECTED );
+
+            if(checkCommunityType){
+                userCommunity.setType(UserCommunityType.PENDING);
+            }else{
+                userCommunity.setType(UserCommunityType.ACTIVATED);
+            }
+            userCommunity.setRole(UserCommunityRoleType.USER);
+
 
             userCommunityService.save(userCommunity);
 
             // You can return a success response or any other response as needed
+            if(checkCommunityType){
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.WANTING, CommunityResultDto.fromEntity(community))
+
+                );
+            }
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", ResponseMessage.CREATED, CommunityResultDto.fromEntity(community))
 
@@ -117,7 +141,7 @@ public class CommunityController {
             // Community exists, so attempt to leave it
             Community community = communityOptional.get();
 
-            boolean check = userCommunityService.doesUserCommunityExist(user.getId(), community.getId());
+            boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityId(user.getId(), community.getId());
 
             if (check) {
                 // User is a member, proceed to remove them from the community
@@ -190,16 +214,42 @@ public class CommunityController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<ResponseObject> getUsersByCommunityName(@Valid @RequestBody CommunityMemberDto communityMemberDto,
+    public ResponseEntity<ResponseObject> getUsersByCommunityName(@Valid @RequestBody CommunityByName communityByName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        CommunityPageMemberDto communityPageMemberDto =  authService.getCommunitiesByCommunityName(communityMemberDto.getName(), page, size);
+        CommunityPageMemberDto communityPageMemberDto =  authService.getMembersByCommunityName(communityByName.getName(), page, size);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityPageMemberDto)
 
         );
     }
+
+    @GetMapping("/post")
+    public ResponseEntity<ResponseObject> getPageOfCommunity(@Valid @RequestBody CommunityByName communityByName,
+                                                                  @RequestParam(defaultValue = "0") int page,
+                                                                  @RequestParam(defaultValue = "10") int size) {
+
+        CommunityPageHeaderPostDto communityPageHeaderPostDto =  postService.findByCommunityNameOrderByCreatedAtDesc(communityByName.getName(), page, size);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityPageHeaderPostDto)
+
+        );
+    }
+
+//    @GetMapping("/users")
+//    public ResponseEntity<ResponseObject> getUsersByCommunityName(@Valid @RequestBody CommunityMemberDto communityMemberDto,
+//                                                                  @RequestParam(defaultValue = "0") int page,
+//                                                                  @RequestParam(defaultValue = "10") int size) {
+//
+//        CommunityPageMemberDto communityPageMemberDto =  authService.getCommunitiesByCommunityName(communityMemberDto.getName(), page, size);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(
+//                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityPageMemberDto)
+//
+//        );
+//    }
 
 }

@@ -9,12 +9,10 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Setter
 @Getter
-@Builder
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Comment  extends DateAudit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

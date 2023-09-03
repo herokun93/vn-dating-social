@@ -5,11 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import vn.dating.app.social.dto.MediaDetailsDto;
+import vn.dating.app.social.dto.community.CommunityHeaderResultDto;
+import vn.dating.app.social.dto.community.CommunityPageDto;
+import vn.dating.app.social.dto.community.CommunityPageHeaderPostDto;
 import vn.dating.app.social.dto.post.PostDetailDto;
 import vn.dating.app.social.dto.post.PostViewDto;
 import vn.dating.app.social.mapper.MediaMapper;
 import vn.dating.app.social.mapper.PostMapper;
 import vn.dating.app.social.models.Comment;
+import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.Post;
 import vn.dating.app.social.models.User;
 import vn.dating.app.social.repositories.PostRepository;
@@ -42,6 +46,13 @@ public class PostService {
 
     @Autowired
     private EntityManager entityManager;
+
+    public CommunityPageHeaderPostDto findByCommunityNameOrderByCreatedAtDesc(String communityName, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> postPage = postRepository.findByCommunityNameOrderByCreatedAtDesc( communityName,  pageable);
+        CommunityPageHeaderPostDto communityPageHeaderPostDto = new CommunityPageHeaderPostDto(postPage);
+        return communityPageHeaderPostDto;
+    }
 
 
 

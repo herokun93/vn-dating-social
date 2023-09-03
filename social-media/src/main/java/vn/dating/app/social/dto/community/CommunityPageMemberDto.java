@@ -21,17 +21,30 @@ public class CommunityPageMemberDto implements Serializable {
     private int totalPages;
     private long totalElements;
     private boolean last;
-    private List<UserResultDto> data = new ArrayList<>();
+    private List<CommunityUserResultDto> data = new ArrayList<>();
 
-    public CommunityPageMemberDto(Page<User> users){
+//    public CommunityPageMemberDto(Page<User> users){
+//
+//        this.page = users.getNumber();
+//        this.totalPages=users.getTotalPages();
+//        this.size=users.getSize();
+//        this.last=users.isLast();
+//        this.totalElements = users.getTotalElements();
+//
+//        List<UserResultDto> userResultDtos = UserResultDto.fromEntities(users.stream().toList());
+//
+//        this.data = userResultDtos;
+//
+//    }
+    public CommunityPageMemberDto(Page<CommunityUserResultDto> userPage){
 
-        this.page = users.getNumber();
-        this.totalPages=users.getTotalPages();
-        this.size=users.getSize();
-        this.last=users.isLast();
-        this.totalElements = users.getTotalElements();
+        this.page = userPage.getNumber();
+        this.totalPages=userPage.getTotalPages();
+        this.size=userPage.getSize();
+        this.last=userPage.isLast();
+        this.totalElements = userPage.getTotalElements();
 
-        List<UserResultDto> userResultDtos = UserResultDto.fromEntities(users.stream().toList());
+        List<CommunityUserResultDto> userResultDtos = userPage.stream().toList();
 
         this.data = userResultDtos;
 

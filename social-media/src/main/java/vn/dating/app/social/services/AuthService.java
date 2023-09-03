@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import vn.dating.app.social.dto.community.CommunityPageMemberDto;
+import vn.dating.app.social.dto.community.CommunityUserResultDto;
 import vn.dating.app.social.exceptions.UserNotFoundException;
 import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.User;
+import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.app.social.repositories.UserRepository;
 import vn.dating.common.dto.CreateUserDto;
 
@@ -45,10 +48,26 @@ public class AuthService {
         }
     }
 
-    public CommunityPageMemberDto getCommunitiesByCommunityName(String communityName, int page, int size) {
+
+
+//    public CommunityPageMemberDto getCommunitiesByCommunityName(String communityName, int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        // Implement the logic to fetch communities created by the user based on creatorId
+//        Page<User> userPage = userRepository.findUsersByCommunities_Community_Name( communityName,  pageable);
+//        CommunityPageMemberDto communityPageMemberDto = new CommunityPageMemberDto(userPage);
+//        return communityPageMemberDto;
+//    }
+
+    public CommunityPageMemberDto getMembersByCommunityName(String communityName, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        // Implement the logic to fetch communities created by the user based on creatorId
-        Page<User> userPage = userRepository.findUsersByCommunities_Community_Name( communityName,  pageable);
+        Page<CommunityUserResultDto> userPage = userRepository.findUsersByCommunityName( communityName,  pageable);
+        CommunityPageMemberDto communityPageMemberDto = new CommunityPageMemberDto(userPage);
+        return communityPageMemberDto;
+    }
+
+    public CommunityPageMemberDto getUsersByCommunityNameAndUserType(String communityName, UserCommunityType userCommunityType,int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CommunityUserResultDto> userPage = userRepository.getUsersByCommunityNameAndUserType( communityName, userCommunityType, pageable);
         CommunityPageMemberDto communityPageMemberDto = new CommunityPageMemberDto(userPage);
         return communityPageMemberDto;
     }

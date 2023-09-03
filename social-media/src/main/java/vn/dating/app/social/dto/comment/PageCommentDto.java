@@ -22,7 +22,7 @@ public class PageCommentDto implements Serializable {
     private int totalPages;
     private long totalElements;
     private boolean last;
-    private List<CommentDto> data = new ArrayList<>();
+    private List<CommentSuccDto> data = new ArrayList<>();
 
     public PageCommentDto(Page<Comment> commentPage){
 
@@ -32,10 +32,10 @@ public class PageCommentDto implements Serializable {
         this.last=commentPage.isLast();
         this.totalElements = commentPage.getTotalElements();
 
-        List<CommentDto> commentDtoList =
+        List<CommentSuccDto> commentSuccDtoList =
                 CommentMapper.toGetCommentDtos(commentPage.stream().collect(Collectors.toList()));
 
-        this.data = commentDtoList;
+        this.data = commentSuccDtoList;
 
     }
 }

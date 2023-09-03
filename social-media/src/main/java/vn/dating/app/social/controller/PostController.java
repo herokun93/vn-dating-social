@@ -3,35 +3,32 @@ package vn.dating.app.social.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.bouncycastle.util.encoders.UTF8;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import vn.dating.app.social.dto.auth.AuthLoginDto;
-import vn.dating.app.social.dto.post.PostViewDto;
-import vn.dating.app.social.mapper.PostMapper;
-import vn.dating.app.social.models.Notify;
-import vn.dating.app.social.models.NotifyEntity;
-import vn.dating.app.social.models.Post;
-import vn.dating.app.social.models.User;
+import vn.dating.app.social.dto.ResponseMessage;
+import vn.dating.app.social.dto.ResponseObject;
+import vn.dating.app.social.dto.post.PostCreateSuccDto;
+import vn.dating.app.social.models.*;
 import vn.dating.app.social.models.eenum.NotificationType;
 import vn.dating.app.social.models.eenum.PostStatus;
-import vn.dating.app.social.models.eenum.PostType;
 import vn.dating.app.social.services.*;
 import vn.dating.app.social.utils.PagedResponse;
-import vn.dating.app.social.utils.TimeHelper;
 
 
-import java.time.Instant;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import java.security.Principal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 
 @Slf4j
@@ -44,6 +41,19 @@ public class PostController {
 
 
 
+
+    @Autowired
+    private AuthService authService;
+
+
+
+    @Autowired
+    private UserCommunityService userCommunityService;
+    @Autowired
+    private CommunityService communityService;
+
+
+
     @Autowired
     private PostService postService;
     @Autowired
@@ -53,9 +63,6 @@ public class PostController {
 
     @Autowired
     private NotificationService notificationService;
-
-    @Autowired
-    private AuthService authService;
 
     @Autowired
     private MediaService mediaService;
@@ -138,74 +145,194 @@ public class PostController {
 //        return Mono.just("upload");
 //    }
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<String> uploadFile(@RequestPart("files") List<MultipartFile> files, @RequestPart("content") String content,
-                                   @RequestPart("title") String title) {
+//    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<ResponseObject> uploadFile(Principal principal,
+//                                                     @RequestPart("files") List<MultipartFile> files,
+//                                                     @RequestPart("content") @NotBlank(message = "Title must not be blank")
+//                                                         @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String content,
+//                                                     @RequestPart("anonymous") @Pattern(regexp = "^(true|false)$",
+//                                                             message = "Anonymous must be 'true' or 'false'") String anonymous,
+//                                                     @RequestPart("type") @Pattern(regexp = "^(PRIVATE|PUBLIC)$",
+//                                                             message = "Type must be 'PRIVATE' or 'PUBLIC'") String type,
+//                                                     @RequestPart("community") @Pattern(regexp = "^[a-z0-9]+$",
+//                                                             message = "Name must consist of lowercase letters (a-z) and digits (0-9) only, with no spaces") String community,
+//                                                     @RequestPart("title") @NotBlank(message = "Title must not be blank")
+//                                                         @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String title) {
+//
+//
+//
+//        boolean isAnonymous = Boolean.parseBoolean(anonymous);
+//        PostType postType = PostType.valueOf(type);
+//
+//
+//
+//        User user = authService.getCurrentUserById(principal);
+//
+//
+//        if(community.compareTo("000")==0){
+//
+//        }else{
+//            boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(user.getId(), community);
+//            if(!check){
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+//                        new ResponseObject("NOTOK", ResponseMessage.NOT_A_MEMBER, "")
+//
+//                );
+//            }else{
+//                Optional<Community> communityOptional = communityService.getCommunityByName(community);
+//                boolean approval = communityOptional.get().isApproval();
+//
+//                Post newPost = new Post();
+//                newPost.setAuthor(user);
+//                newPost.setTitle(title);
+//                newPost.setContent(content);
+//                newPost.setAnonymous(isAnonymous);
+//
+//                if(approval){
+//
+//                }
+//
+//                newPost.setState(PostStatus.PENDING);
+//                newPost.setType(postType);
+//
+//                newPost = postService.save(newPost);
+//
+//                List<String> listMedia =  mediaService.onlySaveFileToLocal(files,false);
+//                mediaService.saveImagesToPost(newPost,listMedia);
+//
+//
+//            }
+//        }
+//
+//
+//
+//
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+//                new ResponseObject("NOTOK", ResponseMessage.NOT_FOUND, "")
+//        );
+//
+//
+//        // Handle the file upload here
+//    }
 
-       List<String> listMedia =  mediaService.onlySaveFile(files);
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseObject> createPostToCommunity(Principal principal,
+                                                     @RequestPart("files") List<MultipartFile> files,
+                                                     @RequestPart("content") @NotBlank(message = "Title must not be blank")
+                                                     @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String content,
+                                                     @RequestPart("anonymous") @Pattern(regexp = "^(true|false)$",
+                                                             message = "Anonymous must be 'true' or 'false'") String anonymous,
+                                                     @RequestPart("community") @Pattern(regexp = "^[a-z0-9]+$",
+                                                             message = "Name must consist of lowercase letters (a-z) and digits (0-9) only, with no spaces") String community,
+                                                     @RequestPart("title") @NotBlank(message = "Title must not be blank")
+                                                     @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String title) {
+
+        boolean isAnonymous = Boolean.parseBoolean(anonymous);
+        User user = authService.getCurrentUserById(principal);
 
 
-        return Mono.just("Received content: " + content + ", title: " + title +" List "+listMedia.toString());
+        boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(user.getId(), community);
+        if(!check){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("NOTOK", ResponseMessage.NOT_A_MEMBER, "")
 
-        // Handle the file upload here
-    }
+            );
+        }else{
+            Optional<Community> communityOptional = communityService.getCommunityByName(community);
+            boolean approval = communityOptional.get().isApproval();
 
+            Post newPost = new Post();
+            newPost.setAuthor(user);
+            newPost.setTitle(title);
+            newPost.setContent(content);
+            newPost.setAnonymous(isAnonymous);
+            newPost.setCommunity(communityOptional.get());
 
-
-
-
-
-    @PostMapping( value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<PostViewDto> createPost(
-                                        @RequestPart("title") String title,
-                                        @RequestPart("content") String content,
-                                        @RequestPart("files") Flux<FilePart> filePartFlux) {
-
-        log.info("abc");
-        Post newPost = new Post();
-
-        User getUser = userService.findById("abc");
-
-        if (getUser == null) {
-            return Mono.error(new RuntimeException("User not found"));
-        }
-
-
-        newPost.setAuthor(getUser);
-        newPost.setDelete(false);
-        Instant jpTime = TimeHelper.getCurrentInstantSystemDefault();
-        newPost.setCreatedAt(jpTime);
-        newPost.setUpdatedAt(jpTime);
-        newPost.setContent(content);
-        newPost.setState(PostStatus.PENDING);
-        newPost.setTitle(title);
-
-        newPost = postService.save(newPost);
-
-
-        PostViewDto postViewDto = PostMapper.toPostCreateView(newPost);
-
-
-        filePartFlux.count().flatMap(count -> {
-            if (count == 0) {
-                return Mono.just(postViewDto);
-            } else {
-
-                Mono<List<String>> listMono = filePartFlux
-                        .flatMap(filePart -> mediaService.onlySaveFile(filePart))
-                        .collectList();
-
-                return listMono.flatMap(filePaths -> {
-                    postViewDto.setMedia(filePaths);
-                    mediaService.saveMediaPost(postViewDto.getId(), filePaths);
-                    return Mono.just(postViewDto);
-                });
-
+            if(approval){
+                newPost.setState(PostStatus.ACCEPTED);
+            }else{
+                newPost.setState(PostStatus.PENDING);
             }
-        });
 
-        return Mono.just(postViewDto);
+            List<String> listMedia =  mediaService.onlySaveListFileToLocal(files,false);
+
+
+            Set<Media> mediaItems = new HashSet<>();
+            for (String mediaPath : listMedia) {
+                Media media = new Media();
+                media.setPath(mediaPath);
+                media.setPost(newPost); // Associate media with the post
+                mediaItems.add(media);
+            }
+            newPost.setMedia(mediaItems);
+
+            newPost = postService.save(newPost);
+
+
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.CREATED, PostCreateSuccDto.fromEntity(newPost))
+            );
+
+        }
     }
+
+
+
+
+
+
+
+
+//    @PostMapping( value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public Mono<PostViewDto> createPost(
+//                                        @RequestPart("title") String title,
+//                                        @RequestPart("content") String content,
+//                                        @RequestPart("files") Flux<FilePart> filePartFlux) {
+//
+//        Post newPost = new Post();
+//
+//        User getUser = userService.findById("abc");
+//
+//        if (getUser == null) {
+//            return Mono.error(new RuntimeException("User not found"));
+//        }
+//
+//
+//        newPost.setAuthor(getUser);
+//        newPost.setDelete(false);
+//        Instant jpTime = TimeHelper.getCurrentInstantSystemDefault();
+//        newPost.setCreatedAt(jpTime);
+//        newPost.setUpdatedAt(jpTime);
+//        newPost.setContent(content);
+//        newPost.setState(PostStatus.PENDING);
+//        newPost.setTitle(title);
+//
+//        newPost = postService.save(newPost);
+//
+//
+//        PostViewDto postViewDto = PostMapper.toPostCreateView(newPost);
+//
+//
+//        filePartFlux.count().flatMap(count -> {
+//            if (count == 0) {
+//                return Mono.just(postViewDto);
+//            } else {
+//
+//                Mono<List<String>> listMono = filePartFlux
+//                        .flatMap(filePart -> mediaService.onlySaveFileToLocal(filePart))
+//                        .collectList();
+//
+//                return listMono.flatMap(filePaths -> {
+//                    postViewDto.setMedia(filePaths);
+//                    mediaService.saveMediaPost(postViewDto.getId(), filePaths);
+//                    return Mono.just(postViewDto);
+//                });
+//
+//            }
+//        });
+//
+//        return Mono.just(postViewDto);
+//    }
 
 
 

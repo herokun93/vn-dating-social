@@ -25,6 +25,8 @@ public class CommunityService {
         community.setName(communityNewDto.getName());
         community.setCreator(user);
         community.setDescription(communityNewDto.getDescription());
+        community.setType(communityNewDto.getType());
+        community.setApproval(communityNewDto.isApproval());
 
         return communityRepository.save(community);
     }

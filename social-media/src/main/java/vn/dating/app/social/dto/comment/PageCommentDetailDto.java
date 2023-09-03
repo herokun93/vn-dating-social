@@ -21,7 +21,7 @@ public class PageCommentDetailDto implements Serializable {
     private int size;
     private int pages;
     private boolean last;
-    private List<CommentDto> data = new ArrayList<>();
+    private List<CommentSuccDto> data = new ArrayList<>();
 
     public PageCommentDetailDto(Page<Comment> commentPage){
 
@@ -30,10 +30,10 @@ public class PageCommentDetailDto implements Serializable {
         this.size=commentPage.getSize();
         this.last=commentPage.isLast();
 
-        List<CommentDto> commentDtoList =
+        List<CommentSuccDto> commentSuccDtoList =
                 CommentMapper.toGetCommentDtos(commentPage.stream().collect(Collectors.toList()));
 
-        this.data = commentDtoList;
+        this.data = commentSuccDtoList;
 
     }
 }

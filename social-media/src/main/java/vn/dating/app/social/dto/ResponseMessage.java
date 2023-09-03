@@ -7,6 +7,7 @@ public enum ResponseMessage {
     UNSUCCESSFUL,
     NOT_MEMBER,
     NOT_A_MEMBER,
+    WANTING,
     DELETED,
     IS_MEMBER,
     EXISTS,

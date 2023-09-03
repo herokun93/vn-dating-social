@@ -38,6 +38,7 @@ class SecurityConfig {
                 .antMatchers("/api/social/posts/public").permitAll()
                 .antMatchers("/api/social/posts/upload/**").permitAll()
                 .antMatchers("/api/social/posts/create").permitAll()
+                .antMatchers("/api/social/comments/**").permitAll()
                 .antMatchers("/api/social/media/**").permitAll()
                 .antMatchers("/api/social/communities/**").permitAll()
 

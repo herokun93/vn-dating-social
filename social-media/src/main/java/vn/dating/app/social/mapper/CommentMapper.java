@@ -3,7 +3,7 @@ package vn.dating.app.social.mapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import vn.dating.app.social.dto.comment.CommentDetailsDto;
-import vn.dating.app.social.dto.comment.CommentDto;
+import vn.dating.app.social.dto.comment.CommentSuccDto;
 import vn.dating.app.social.models.Comment;
 import vn.dating.app.social.models.Reply;
 
@@ -38,23 +38,23 @@ public class CommentMapper {
         return commentDetailsDtos;
     }
 
-    public static List<CommentDto> toGetCommentDtos(List<Comment> comments) {
+    public static List<CommentSuccDto> toGetCommentDtos(List<Comment> comments) {
 
         ModelMapper modelMapper = new ModelMapper();
-        List<CommentDto> commentDtoList = new ArrayList<>();
+        List<CommentSuccDto> commentSuccDtoList = new ArrayList<>();
         comments.forEach(comment -> {
-            CommentDto commentDto = modelMapper.map(comment,CommentDto.class);
+            CommentSuccDto commentSuccDto = modelMapper.map(comment, CommentSuccDto.class);
 
 
-            commentDto.setCountLike(comment.getLikes().size());
+            commentSuccDto.setCountLike(comment.getLikes().size());
             List<Reply> replies = comment.getReplies().stream().toList();
-            commentDto.setCountReply(replies.size());
+            commentSuccDto.setCountReply(replies.size());
 //            commentDto.setReplies(replies.subList(0, Math.min(replies.size(), 3)));
-            commentDtoList.add(commentDto);
+            commentSuccDtoList.add(commentSuccDto);
 
 
         });
 
-        return commentDtoList;
+        return commentSuccDtoList;
     }
 }

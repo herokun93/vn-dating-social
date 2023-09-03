@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.dating.app.social.models.Post;
 
@@ -16,6 +17,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Post save(Post post);
     Page<Post> findByAuthorId(Long id, Pageable pageable);
+
+//    @Query("SELECT * FROM Post p WHERE p.community_id IN (SELECT id FROM Community WHERE name = ?) ORDER BY p.created_at DESC")
+    Page<Post> findByCommunityNameOrderByCreatedAtDesc(@Param("communityName") String communityName, Pageable pageable);
 
 
     Optional<Post> findByUrl(String url);

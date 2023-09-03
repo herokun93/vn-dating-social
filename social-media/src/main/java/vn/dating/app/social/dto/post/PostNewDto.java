@@ -10,12 +10,13 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostNewDto implements Serializable {
+public class PostNewDto  {
     private String content;
     private String title;
+    private boolean anonymous;
+    private String community;
     @NotBlank
     private Flux<FilePart> files;
 }

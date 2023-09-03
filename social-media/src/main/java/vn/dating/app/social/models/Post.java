@@ -45,8 +45,8 @@ public class Post extends DateAudit {
     @OneToMany(mappedBy = "post",fetch = FetchType.EAGER)
     private Set<Comment> comments;
 
-    @OneToMany(mappedBy = "post",fetch = FetchType.EAGER)
-    private Set<Media> media;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Media> media = new HashSet<>();
 
 
     @OneToMany(mappedBy = "post",fetch = FetchType.EAGER)
@@ -61,12 +61,13 @@ public class Post extends DateAudit {
 
     boolean anonymous;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "community_id")
     private Community community;
 
-    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL)
-    private Set<Post> posts = new HashSet<>();
+
+
+
 
 
     @PrePersist

@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import vn.dating.app.social.models.eenum.UserCommunityRoleType;
+import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.common.models.audit.DateAudit;
 
 import javax.persistence.Entity;
@@ -28,6 +30,10 @@ public class UserCommunity extends DateAudit {
     @JoinColumn(name = "community_id")
     private Community community;
 
-    private boolean active;
+    @Enumerated(EnumType.STRING)
+    private UserCommunityType type;
+
+    @Enumerated(EnumType.STRING)
+    private UserCommunityRoleType role;
 
 }

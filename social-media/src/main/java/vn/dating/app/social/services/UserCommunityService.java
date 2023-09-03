@@ -14,8 +14,16 @@ public class UserCommunityService {
     @Autowired
     private UserCommunityRepository userCommunityRepository;
 
-    public boolean doesUserCommunityExist(String userId, Long communityId) {
+    public boolean doesUserCommunityExistByUserIdAndCommunityId(String userId, Long communityId) {
         return userCommunityRepository.existsByUser_IdAndCommunity_Id(userId, communityId);
+    }
+
+    public boolean doesUserCommunityExistByUserIdAndCommunityName(String userId, String communityName) {
+        return userCommunityRepository.existsByUser_IdAndCommunity_Name(userId, communityName);
+    }
+
+    public boolean isUserMemberOfSameCommunity(String userId,String postUrl){
+        return  userCommunityRepository.isUserMemberOfSameCommunity(userId,postUrl);
     }
 
     public UserCommunity save(UserCommunity userCommunity){

@@ -14,7 +14,7 @@ import javax.validation.constraints.Size;
 @Setter
 @ToString
 @NoArgsConstructor
-public class CommunityMemberDto {
+public class CommunityByName {
     @NotBlank(message = "Name cannot be blank")
     @Size(min=3,max = 255, message = "Name must be less than or equal to 255 characters")
     @Pattern(regexp = "^[a-z0-9]+$", message = "Name must consist of lowercase letters (a-z) and digits (0-9) only, with no spaces")

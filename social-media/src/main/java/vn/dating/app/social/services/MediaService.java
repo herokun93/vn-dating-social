@@ -15,7 +15,6 @@ import vn.dating.app.social.models.Reply;
 import vn.dating.app.social.repositories.*;
 import vn.dating.app.social.utils.RandomStringTime;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,7 +66,7 @@ public class MediaService {
         }
     }
 
-    public Mono<String> onlySaveFile(FilePart filePart) {
+    public Mono<String> onlySaveListFileToLocal(FilePart filePart) {
 
         if (!Files.exists(Path.of(UPLOAD_DIR))) {
             try {
@@ -88,7 +87,7 @@ public class MediaService {
                 .onErrorResume(error -> Mono.error(new RuntimeException("File saving failed.", error)));
     }
 
-    public List<String> onlySaveFile(List<MultipartFile> files) {
+    public List<String> onlySaveListFileToLocal(List<MultipartFile> files, boolean insertUrl) {
 
         List<String> listFile = new ArrayList<>();
 
@@ -111,7 +110,12 @@ public class MediaService {
 
             try {
                 Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
-                listFile.add(API_GET_IMAGE+newFileName);
+                if(insertUrl){
+                    listFile.add(API_GET_IMAGE+newFileName);
+                }else{
+                    listFile.add(newFileName);
+                }
+
 
             } catch (IOException e) {
 
@@ -119,6 +123,41 @@ public class MediaService {
             }
         }
         return listFile;
+    }
+
+    public String onlySaveFileToLocal(MultipartFile file, boolean insertUrl) {
+
+        if (!Files.exists(Path.of(UPLOAD_DIR))) {
+            try {
+                Files.createDirectories(Path.of(UPLOAD_DIR));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+        String filename = file.getOriginalFilename();
+        String extension = FilenameUtils.getExtension(filename).toLowerCase();
+        String newFileName = RandomStringTime.generateRandomStringByTime()+"."+extension;
+
+
+        Path destinationPath = Path.of(UPLOAD_DIR, newFileName);
+
+        try {
+            Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            if(insertUrl){
+                newFileName = API_GET_IMAGE+newFileName;
+            }else{
+
+            }
+
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+
+        return newFileName;
     }
 
     public void saveImageToComment(Comment newComment, String dirPath){

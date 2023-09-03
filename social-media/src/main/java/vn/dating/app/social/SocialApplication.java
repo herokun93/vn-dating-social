@@ -1,6 +1,7 @@
 package vn.dating.app.social;
 
 
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -17,6 +18,11 @@ public class SocialApplication {
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+    @Bean
+    public Hibernate5Module jsonHibernate5Module() {
+        return new Hibernate5Module();
     }
 
 //    @Bean

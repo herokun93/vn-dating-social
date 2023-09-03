@@ -10,7 +10,6 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentDetailsDto extends DateAudit implements Serializable {
