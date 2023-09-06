@@ -5,11 +5,14 @@ package vn.dating.app.gateway.configs;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.cloud.gateway.config.GlobalCorsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -22,6 +25,9 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Mono;
 
 
@@ -73,8 +79,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity) {
 
         serverHttpSecurity
-//                .csrf().csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse())
-//                .and()
+                .cors().and()
                 .csrf().disable()
                 .authorizeExchange(exchange ->
                         exchange.pathMatchers("/eureka/**").permitAll()
@@ -109,8 +114,20 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                                 .anyExchange().authenticated())
                 //.oauth2ResourceServer().jwt(jwtSpec -> jwtSpec.jwtAuthenticationConverter())
               .oauth2ResourceServer(ServerHttpSecurity.OAuth2ResourceServerSpec::jwt);
+
+
+
         return serverHttpSecurity.build();
     }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource(GlobalCorsProperties globalCorsProperties) {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        globalCorsProperties.getCorsConfigurations()
+                .forEach(source::registerCorsConfiguration);
+        return source;
+    }
+
 
     private Mono<AuthorizationDecision> isRoleUser(Mono<Authentication> authenticationMono,
                                                    AuthorizationContext authorizationContext) {

@@ -9,7 +9,12 @@ import vn.dating.app.social.dto.community.CommunityNewDto;
 import vn.dating.app.social.dto.community.CommunityPageDto;
 import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.User;
+import vn.dating.app.social.models.UserCommunity;
+import vn.dating.app.social.models.eenum.CommunityType;
+import vn.dating.app.social.models.eenum.UserCommunityRoleType;
+import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.app.social.repositories.CommunityRepository;
+import vn.dating.app.social.repositories.UserCommunityRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +24,12 @@ public class CommunityService {
     @Autowired
     private CommunityRepository communityRepository;
 
+    @Autowired
+    private UserCommunityRepository userCommunityRepository;
+
     public Community createCommunity(User user,CommunityNewDto communityNewDto) {
+
+        String creatorId = user.getId();
 
         Community community = new Community();
         community.setName(communityNewDto.getName());
@@ -27,8 +37,19 @@ public class CommunityService {
         community.setDescription(communityNewDto.getDescription());
         community.setType(communityNewDto.getType());
         community.setApproval(communityNewDto.isApproval());
+        community.setAuth(creatorId);
 
-        return communityRepository.save(community);
+        community = communityRepository.save(community);
+        UserCommunity userCommunity = new UserCommunity();
+        userCommunity.setUser(user);
+        userCommunity.setCommunity(community);
+        userCommunity.setType(UserCommunityType.ACTIVATED);
+        userCommunity.setRole(UserCommunityRoleType.ADMIN);
+        userCommunity.setAuth(creatorId);
+
+        userCommunityRepository.save(userCommunity);
+
+        return community;
     }
 
     public Optional<Community> getCommunityById(Long id) {
@@ -48,6 +69,16 @@ public class CommunityService {
         return communityPageDto;
     }
 
+
+    public CommunityPageDto getCommunitiesOfUser(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        // Implement the logic to fetch communities created by the user based on creatorId
+
+
+        Page<Community> communityPage = communityRepository.findCommunitiesByMemberUserId( userId,  pageable);
+        CommunityPageDto communityPageDto = new CommunityPageDto(communityPage);
+        return communityPageDto;
+    }
     public List<Community> getAllCommunities() {
         return communityRepository.findAll();
     }

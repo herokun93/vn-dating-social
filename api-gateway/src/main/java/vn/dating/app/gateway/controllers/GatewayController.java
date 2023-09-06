@@ -39,7 +39,7 @@ public class GatewayController {
 
 
     @GetMapping("/public")
-    @ResponseStatus(HttpStatus.OK)
+    @CrossOrigin
     public String getPublic(){
         return "gateway-public";
     }

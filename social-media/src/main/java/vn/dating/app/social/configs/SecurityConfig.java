@@ -35,6 +35,7 @@ class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
+
                 .antMatchers("/api/social/posts/public").permitAll()
                 .antMatchers("/api/social/posts/upload/**").permitAll()
                 .antMatchers("/api/social/posts/create").permitAll()

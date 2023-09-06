@@ -46,9 +46,9 @@ public class CommentMapper {
             CommentSuccDto commentSuccDto = modelMapper.map(comment, CommentSuccDto.class);
 
 
-            commentSuccDto.setCountLike(comment.getLikes().size());
+//            commentSuccDto.setCountLike(comment.getLikes().size());
             List<Reply> replies = comment.getReplies().stream().toList();
-            commentSuccDto.setCountReply(replies.size());
+//            commentSuccDto.setCountReply(replies.size());
 //            commentDto.setReplies(replies.subList(0, Math.min(replies.size(), 3)));
             commentSuccDtoList.add(commentSuccDto);
 

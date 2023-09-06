@@ -23,6 +23,8 @@ public class Media extends DateAudit {
     @Column(nullable = false)
     private String path;
 
+    private String sub;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "post_id")
     private Post post;

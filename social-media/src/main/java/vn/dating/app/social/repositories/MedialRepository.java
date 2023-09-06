@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface MedialRepository extends JpaRepository<Media, Long> {
     Page<Media> findByPostId(Long id, Pageable pageable);
 
+    Optional<Media> findByPath(String path);
+
 
     Optional<Media> findByCommentId(Long aLong);
     Optional<Media> findByReplyId(Long aLong);

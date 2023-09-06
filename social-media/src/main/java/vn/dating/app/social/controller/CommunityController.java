@@ -213,6 +213,33 @@ public class CommunityController {
         );
     }
 
+    @GetMapping("/public")
+    @CrossOrigin
+    public String getPublic(){
+        log.error("social-community-public");
+
+        return "social-community-public";
+    }
+
+
+
+    @GetMapping("/list")
+    @CrossOrigin
+    public ResponseEntity<ResponseObject> getCommunitiesOfUser(Principal principal,
+                                                                  @RequestParam(defaultValue = "0") int page,
+                                                                  @RequestParam(defaultValue = "10") int size) {
+        log.info("new rq");
+        User user = authService.getCurrentUserById(principal);
+
+
+
+        CommunityPageDto  communityPageDto = communityService.getCommunitiesOfUser(user.getId(), page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityPageDto)
+
+        );
+    }
+
     @GetMapping("/users")
     public ResponseEntity<ResponseObject> getUsersByCommunityName(@Valid @RequestBody CommunityByName communityByName,
             @RequestParam(defaultValue = "0") int page,

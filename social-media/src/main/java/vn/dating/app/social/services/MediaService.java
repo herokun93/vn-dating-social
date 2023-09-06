@@ -66,6 +66,15 @@ public class MediaService {
         }
     }
 
+    public String getLinkMedia(String url){
+        Media media = medialRepository.findByPath(url).orElse(null);
+        if(media==null){
+            return "notFound";
+        }else{
+            return media.getPath();
+        }
+    }
+
     public Mono<String> onlySaveListFileToLocal(FilePart filePart) {
 
         if (!Files.exists(Path.of(UPLOAD_DIR))) {

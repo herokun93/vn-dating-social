@@ -32,57 +32,76 @@ public class MediaController {
     @GetMapping("/{filename}")
     public ResponseEntity<FileSystemResource> getMedia(@PathVariable String filename) {
 
-        Path imagePath = Paths.get(UPLOAD_DIR + filename);
 
-        FileSystemResource resource = new FileSystemResource(imagePath);
+        String path = mediaService.getLinkMedia(filename);
 
-        String extension = FilenameUtils.getExtension(filename).toLowerCase();
-        MediaType mediaType;
-        switch (extension) {
-            case "png":
-                mediaType = MediaType.IMAGE_PNG;
-                break;
-            case "jpg":
-            case "jpeg":
-                mediaType = MediaType.IMAGE_JPEG;
-                break;
-            case "gif":
-                mediaType = MediaType.IMAGE_GIF;
-                break;
-            case "mp4":
-                mediaType = MediaType.parseMediaType("video/mp4");
-                break;
-            case "avi":
-                mediaType = MediaType.parseMediaType("video/avi");
-                break;
-            default:
-                // Set a default media type for other media types
-                mediaType = MediaType.APPLICATION_OCTET_STREAM;
-                break;
+        Path imagePath = Paths.get(UPLOAD_DIR + path);
+
+        boolean exists = Files.exists(imagePath);
+
+        if(exists){
+            FileSystemResource resource = new FileSystemResource(imagePath);
+
+            String extension = FilenameUtils.getExtension(filename).toLowerCase();
+            MediaType mediaType;
+            switch (extension) {
+                case "png":
+                    mediaType = MediaType.IMAGE_PNG;
+                    break;
+                case "jpg":
+                case "jpeg":
+                    mediaType = MediaType.IMAGE_JPEG;
+                    break;
+                case "gif":
+                    mediaType = MediaType.IMAGE_GIF;
+                    break;
+                case "mp4":
+                    mediaType = MediaType.parseMediaType("video/mp4");
+                    break;
+                case "avi":
+                    mediaType = MediaType.parseMediaType("video/avi");
+                    break;
+                default:
+                    // Set a default media type for other media types
+                    mediaType = MediaType.APPLICATION_OCTET_STREAM;
+                    break;
+            }
+            return ResponseEntity.ok()
+                    .contentType(mediaType) // Set the appropriate media type based on your image format
+                    .body(resource);
         }
-        return ResponseEntity.ok()
-                .contentType(mediaType) // Set the appropriate media type based on your image format
-                .body(resource);
+
+
+        return ResponseEntity.notFound().build();
+
     }
 
     @GetMapping("/stream/{filename}")
-    public ResponseEntity<Resource> stream(@PathVariable String filename) throws IOException {
+    public ResponseEntity<Resource> stream(@PathVariable String filename)  {
         Path imagePath = Paths.get(UPLOAD_DIR + filename);
 
         System.out.println("client access");
         if (!Files.exists(imagePath)) {
-            // Return a 404 Not Found response if the file does not exist
-            System.out.println("Return a 404 Not Found response if the file does not exist");
             return ResponseEntity.notFound().build();
         }
 
-        String contentType = Files.probeContentType(imagePath);
+        String contentType = null;
+        try {
+            contentType = Files.probeContentType(imagePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         if (contentType == null) {
             contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
         System.out.println("play video");
 
-        byte[] imageBytes = Files.readAllBytes(imagePath);
+        byte[] imageBytes = new byte[0];
+        try {
+            imageBytes = Files.readAllBytes(imagePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Resource imageResource = new ByteArrayResource(imageBytes);
 
         HttpHeaders headers = new HttpHeaders();
