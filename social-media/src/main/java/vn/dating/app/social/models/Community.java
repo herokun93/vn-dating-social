@@ -28,6 +28,7 @@ public class Community extends DateAudit {
     private CommunityType type;
 
     private boolean approval;
+    private String avatar;
 
 
     @ManyToOne

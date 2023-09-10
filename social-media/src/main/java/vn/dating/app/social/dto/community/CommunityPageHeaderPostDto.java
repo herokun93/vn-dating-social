@@ -4,7 +4,6 @@ import lombok.*;
 import org.springframework.data.domain.Page;
 import vn.dating.app.social.models.Post;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class CommunityPageHeaderPostDto {
     private int totalPages;
     private long totalElements;
     private boolean last;
-    private List<CommunityHeaderResultDto> data = new ArrayList<>();
+    private List<ComunityPostHeaderResultDto> data = new ArrayList<>();
 
     public CommunityPageHeaderPostDto(Page<Post> postPage){
 
@@ -28,7 +27,7 @@ public class CommunityPageHeaderPostDto {
         this.size=postPage.getSize();
         this.last=postPage.isLast();
         this.totalElements = postPage.getTotalElements();
-        this.data  = CommunityHeaderResultDto.fromEntities(postPage.stream().toList());
+        this.data  = ComunityPostHeaderResultDto.fromEntities(postPage.stream().toList());
 
     }
 }

@@ -45,6 +45,8 @@ public class User extends DateAudit {
     @Column(name = "url",nullable = false)
     private String url;
 
+    private String avatar;
+
     @OneToMany(mappedBy = "user")
     private Set<UserCommunity> communities = new HashSet<>();
 

@@ -79,7 +79,14 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity) {
 
         serverHttpSecurity
-                .cors().and()
+                .cors()
+                .configurationSource(request->{
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+                    configuration.setAllowedMethods(List.of("*"));
+                    configuration.setAllowedHeaders(List.of("*"));
+                    return configuration;})
+                .and()
                 .csrf().disable()
                 .authorizeExchange(exchange ->
                         exchange.pathMatchers("/eureka/**").permitAll()
@@ -90,6 +97,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                                 .pathMatchers("/api/gateway/gateway/**").permitAll()
                                 .pathMatchers("/api/gateway/private").authenticated()
                                 .pathMatchers("/api/gateway/auth/create").permitAll()
+                                .pathMatchers("/api/gateway/auth/v/**").permitAll()
                                 .pathMatchers("/api/social/auth/create").permitAll()
                                 .pathMatchers("/api/social/auth/public").permitAll()
                                 .pathMatchers("/api/social/posts/create").access(this::isRoleUser)

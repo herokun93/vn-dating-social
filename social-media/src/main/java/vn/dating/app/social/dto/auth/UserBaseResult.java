@@ -9,11 +9,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBaseResult {
-    protected String id;
-    protected String username;
-    protected String firstName;
-    protected String lastName;
-    protected String email;
+    private String id;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String avatar;
 
 
 }

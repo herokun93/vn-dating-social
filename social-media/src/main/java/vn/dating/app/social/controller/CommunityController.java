@@ -214,7 +214,6 @@ public class CommunityController {
     }
 
     @GetMapping("/public")
-    @CrossOrigin
     public String getPublic(){
         log.error("social-community-public");
 
@@ -224,11 +223,9 @@ public class CommunityController {
 
 
     @GetMapping("/list")
-    @CrossOrigin
     public ResponseEntity<ResponseObject> getCommunitiesOfUser(Principal principal,
                                                                   @RequestParam(defaultValue = "0") int page,
                                                                   @RequestParam(defaultValue = "10") int size) {
-        log.info("new rq");
         User user = authService.getCurrentUserById(principal);
 
 
@@ -254,11 +251,15 @@ public class CommunityController {
     }
 
     @GetMapping("/post")
-    public ResponseEntity<ResponseObject> getPageOfCommunity(@Valid @RequestBody CommunityByName communityByName,
+    public ResponseEntity<ResponseObject> getPageOfCommunity(// @RequestBody CommunityByName communityByName,
+                                                             @RequestParam() String name ,
                                                                   @RequestParam(defaultValue = "0") int page,
-                                                                  @RequestParam(defaultValue = "10") int size) {
+                                                                  @RequestParam(defaultValue = "10") int size
+                                                             ) {
 
-        CommunityPageHeaderPostDto communityPageHeaderPostDto =  postService.findByCommunityNameOrderByCreatedAtDesc(communityByName.getName(), page, size);
+        log.info("get post of communities");
+
+        CommunityPageHeaderPostDto communityPageHeaderPostDto =  postService.findByCommunityNameOrderByCreatedAtDesc(name, page, size);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityPageHeaderPostDto)

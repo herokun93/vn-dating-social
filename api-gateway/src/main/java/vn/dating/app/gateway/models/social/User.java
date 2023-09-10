@@ -24,6 +24,7 @@ public class User {
     private String lastName;
     private boolean online;
     private Instant lastOnline;
+    private String avatar;
     private String url;
     public User(CreateUserDto createUserDto){
         this.id = createUserDto.getId();

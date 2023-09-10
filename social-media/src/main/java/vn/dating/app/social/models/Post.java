@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.validator.constraints.Length;
 import vn.dating.app.social.models.eenum.PostStatus;
 import vn.dating.app.social.models.eenum.PostType;
 import vn.dating.common.models.audit.DateAudit;
@@ -27,6 +28,7 @@ public class Post extends DateAudit {
     private Long id;
 
     @Column(nullable = false)
+    @Length(max = 1000) // Set the maximum length to 50 characters
     private String content;
 
     @Column(nullable = false)

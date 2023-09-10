@@ -29,6 +29,53 @@ public class MediaController {
     @Value("${upload.directory}")
     private String UPLOAD_DIR;
 
+    @GetMapping("/a/{filename}")
+    public ResponseEntity<FileSystemResource> getAvatar(@PathVariable String filename) {
+
+
+
+
+        Path imagePath = Paths.get(UPLOAD_DIR+"avatar/" + filename);
+
+        boolean exists = Files.exists(imagePath);
+
+        if(exists){
+            FileSystemResource resource = new FileSystemResource(imagePath);
+
+            String extension = FilenameUtils.getExtension(filename).toLowerCase();
+            MediaType mediaType;
+            switch (extension) {
+                case "png":
+                    mediaType = MediaType.IMAGE_PNG;
+                    break;
+                case "jpg":
+                case "jpeg":
+                    mediaType = MediaType.IMAGE_JPEG;
+                    break;
+                case "gif":
+                    mediaType = MediaType.IMAGE_GIF;
+                    break;
+                case "mp4":
+                    mediaType = MediaType.parseMediaType("video/mp4");
+                    break;
+                case "avi":
+                    mediaType = MediaType.parseMediaType("video/avi");
+                    break;
+                default:
+                    // Set a default media type for other media types
+                    mediaType = MediaType.APPLICATION_OCTET_STREAM;
+                    break;
+            }
+            return ResponseEntity.ok()
+                    .contentType(mediaType) // Set the appropriate media type based on your image format
+                    .body(resource);
+        }
+
+
+        return ResponseEntity.notFound().build();
+
+    }
+
     @GetMapping("/{filename}")
     public ResponseEntity<FileSystemResource> getMedia(@PathVariable String filename) {
 

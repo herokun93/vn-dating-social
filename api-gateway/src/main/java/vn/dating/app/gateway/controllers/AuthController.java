@@ -3,12 +3,13 @@ package vn.dating.app.gateway.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import vn.dating.app.gateway.models.social.User;
@@ -17,6 +18,9 @@ import vn.dating.common.dto.CreateUserDto;
 import vn.dating.common.response.CreateAuthResponse;
 
 import javax.validation.Valid;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 @Slf4j
@@ -25,9 +29,11 @@ import javax.validation.Valid;
 @RequestMapping("/api/gateway/auth")
 public class AuthController {
 
-
     private AuthService authService;
     private final WebClient webClient;
+
+    @Value("${upload.directory}")
+    private String UPLOAD_DIR;
 
     private final String SOCIAL_AUTH_CREATE = "http://localhost:2007";
     @Autowired
@@ -58,6 +64,51 @@ public class AuthController {
         if(saveUser==null)   return ResponseEntity.badRequest().body(new CreateAuthResponse("Cannot save user", "GATEWAY"));
 
         return ResponseEntity.ok().body(new CreateAuthResponse("User created, data saved, and API called", "SOCIAL"));
+    }
+
+    @GetMapping("/v/{filename}")
+    public ResponseEntity<FileSystemResource> getMedia(@PathVariable String filename) {
+        log.info(filename);
+
+        Path imagePath = Paths.get(UPLOAD_DIR + filename);
+
+        boolean exists = Files.exists(imagePath);
+
+        if(exists){
+            FileSystemResource resource = new FileSystemResource(imagePath);
+
+            String extension = FilenameUtils.getExtension(filename).toLowerCase();
+            MediaType mediaType;
+            switch (extension) {
+                case "png":
+                    mediaType = MediaType.IMAGE_PNG;
+                    break;
+                case "jpg":
+                case "jpeg":
+                    mediaType = MediaType.IMAGE_JPEG;
+                    break;
+                case "gif":
+                    mediaType = MediaType.IMAGE_GIF;
+                    break;
+                case "mp4":
+                    mediaType = MediaType.parseMediaType("video/mp4");
+                    break;
+                case "avi":
+                    mediaType = MediaType.parseMediaType("video/avi");
+                    break;
+                default:
+                    // Set a default media type for other media types
+                    mediaType = MediaType.APPLICATION_OCTET_STREAM;
+                    break;
+            }
+            return ResponseEntity.ok()
+                    .contentType(mediaType) // Set the appropriate media type based on your image format
+                    .body(resource);
+        }
+
+
+        return ResponseEntity.notFound().build();
+
     }
 
 
