@@ -7,12 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.dating.app.social.dto.ResponseMessage;
+import vn.dating.app.social.dto.ResponseObject;
+import vn.dating.app.social.dto.auth.UserBaseResult;
 import vn.dating.app.social.models.User;
 import vn.dating.app.social.services.AuthService;
+import vn.dating.app.social.utils.UtilsAvatar;
 import vn.dating.common.dto.CreateUserDto;
 import vn.dating.common.response.CreateAuthResponse;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Slf4j
 @RestController
@@ -27,6 +32,23 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     public String getPublic(){
         return "public";
+    }
+
+    @GetMapping("/me")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ResponseObject> getMe(Principal principal){
+
+        User user = authService.getCurrentUserById(principal);
+
+        UserBaseResult userBaseResult = new UserBaseResult();
+
+        userBaseResult.setId(user.getId());
+        userBaseResult.setAvatar(UtilsAvatar.toPath(user.getAvatar()));
+        userBaseResult.setUsername(user.getUsername());
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,userBaseResult)
+        );
     }
 
     @PostMapping("/create")

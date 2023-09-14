@@ -6,10 +6,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import vn.dating.app.social.dto.comment.CommentPageDetails;
+import vn.dating.app.social.dto.community.CommunityPageDto;
 import vn.dating.app.social.dto.post.PostDetailDto;
 import vn.dating.app.social.mapper.CommentMapper;
 import vn.dating.app.social.mapper.PostMapper;
 import vn.dating.app.social.models.Comment;
+import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.Post;
 import vn.dating.app.social.models.User;
 import vn.dating.app.social.repositories.CommentRepository;
@@ -96,6 +99,21 @@ public class CommentService {
                 comments.getTotalPages(), comments.isLast());
     }
 
+//    public CommunityPageDto getCommunitiesByCreatorId(String creatorId, int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        // Implement the logic to fetch communities created by the user based on creatorId
+//        Page<Community> communityPage = communityRepository.findCommunitiesByCreator_Id( creatorId,  pageable);
+//        CommunityPageDto communityPageDto = new CommunityPageDto(communityPage);
+//        return communityPageDto;
+//    }
+//    public CommentPageDetails getCommentsByPostUrl(String postUrl, int page, int size){
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<Comment> pageComments = commentRepository.findByPost_Url(postUrl,pageable);
+//
+//        CommentPageDetails commentPageDetails = new CommentPageDetails(pageComments);
+//        return commentPageDetails;
+//    }
+
     public PagedResponse getDetailsNews(String postUrl, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Comment> comments = commentRepository.findByPost_Url(postUrl,pageable);
@@ -113,6 +131,11 @@ public class CommentService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Comment> comments = commentRepository.findByPost_Url(post.getUrl(), pageable);
         return PostMapper.toPostDetail(post,comments);
+    }
+
+    public Page<Comment> getPageCommentByPostUrl(String postUrl,int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return commentRepository.findByPost_Url(postUrl, pageable);
     }
 
     public PagedResponse findCommentsByUserId(Long id, int page, int size) {

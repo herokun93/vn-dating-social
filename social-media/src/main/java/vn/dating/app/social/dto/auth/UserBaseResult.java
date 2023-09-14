@@ -5,7 +5,6 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBaseResult {
@@ -15,6 +14,4 @@ public class UserBaseResult {
     private String lastName;
     private String email;
     private String avatar;
-
-
 }

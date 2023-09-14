@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.dating.app.social.dto.ResponseMessage;
 import vn.dating.app.social.dto.ResponseObject;
+import vn.dating.app.social.dto.community.CommunityResultDto;
 import vn.dating.app.social.dto.post.PostCreateSuccDto;
+import vn.dating.app.social.dto.post.PostDetailsDto;
 import vn.dating.app.social.models.*;
 import vn.dating.app.social.models.eenum.NotificationType;
 import vn.dating.app.social.models.eenum.PostStatus;
@@ -93,14 +95,26 @@ public class PostController {
         return new ResponseEntity<>(pagedResponse, HttpStatus.OK);
     }
 
+//    @GetMapping("/url/{url}")
+//    public ResponseEntity getPost(@PathVariable("url") String url,
+//                                  @RequestParam(defaultValue = "0") int page,
+//                                  @RequestParam(defaultValue = "10") int size) {
+//
+//        Post post = postService.findByUrl(url);
+//        if(post==null) return new ResponseEntity<>("Post not exist",HttpStatus.BAD_REQUEST);
+//        return new ResponseEntity<>(commentService.getDetailsPost(post,page,size), HttpStatus.OK);
+//    }
+
     @GetMapping("/url/{url}")
-    public ResponseEntity getPost(@PathVariable("url") String url,
+    public ResponseEntity<ResponseObject> getPost(@PathVariable("url") String url,
                                   @RequestParam(defaultValue = "0") int page,
                                   @RequestParam(defaultValue = "10") int size) {
 
-        Post post = postService.findByUrl(url);
-        if(post==null) return new ResponseEntity<>("Post not exist",HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(commentService.getDetailsPost(post,page,size), HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,
+                        postService.getPostDetailsByUrl(url,page,size))
+
+        );
     }
     @GetMapping("/{url}/comment")
     public ResponseEntity getCommentOfPost(@PathVariable("url") String url,

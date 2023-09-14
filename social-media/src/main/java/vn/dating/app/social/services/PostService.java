@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import vn.dating.app.social.dto.MediaDetailsDto;
 import vn.dating.app.social.dto.community.CommunityPageHeaderPostDto;
 import vn.dating.app.social.dto.post.PostDetailDto;
+import vn.dating.app.social.dto.post.PostDetailsDto;
 import vn.dating.app.social.dto.post.PostViewDto;
 import vn.dating.app.social.mapper.MediaMapper;
 import vn.dating.app.social.mapper.PostMapper;
@@ -14,6 +15,7 @@ import vn.dating.app.social.models.Comment;
 import vn.dating.app.social.models.Post;
 import vn.dating.app.social.models.User;
 import vn.dating.app.social.repositories.PostRepository;
+import vn.dating.app.social.repositories.UserRepository;
 import vn.dating.app.social.utils.PagedResponse;
 
 import javax.persistence.EntityManager;
@@ -27,6 +29,8 @@ import java.util.List;
 @Service
 @Slf4j
 public class PostService {
+    @Autowired
+    private UserRepository userRepository;
 
 
     @Autowired
@@ -49,6 +53,17 @@ public class PostService {
         Page<Post> postPage = postRepository.findByCommunityNameOrderByCreatedAtDesc( communityName,  pageable);
         CommunityPageHeaderPostDto communityPageHeaderPostDto = new CommunityPageHeaderPostDto(postPage);
         return communityPageHeaderPostDto;
+    }
+
+    public PostDetailsDto getPostDetailsByUrl(String postUrl, int page, int size){
+
+        Post post = postRepository.findByUrl(postUrl).get();
+        if(post==null) return  new PostDetailsDto();
+
+        Page<Comment> comments = commentService.getPageCommentByPostUrl(postUrl, page,size);
+
+        return   PostDetailsDto.fromEntity(post,comments);
+
     }
 
 
