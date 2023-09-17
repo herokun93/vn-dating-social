@@ -12,12 +12,10 @@ import vn.dating.app.social.dto.ResponseObject;
 import vn.dating.app.social.dto.comment.CommentSuccDto;
 import vn.dating.app.social.models.Comment;
 import vn.dating.app.social.models.Media;
+import vn.dating.app.social.models.Post;
 import vn.dating.app.social.models.User;
 import vn.dating.app.social.repositories.MedialRepository;
-import vn.dating.app.social.services.AuthService;
-import vn.dating.app.social.services.CommentService;
-import vn.dating.app.social.services.MediaService;
-import vn.dating.app.social.services.UserCommunityService;
+import vn.dating.app.social.services.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -32,6 +30,9 @@ import java.util.List;
 public class CommentController {
     @Autowired
     private MedialRepository medialRepository;
+
+    @Autowired
+    private PostService postService;
 
     @Autowired
     private CommentService commentService;
@@ -75,8 +76,41 @@ public class CommentController {
 
             comment = commentService.save(comment);
 
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.CREATED, CommentSuccDto.fromEntity(comment))
+            );
 
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("NOTOK", ResponseMessage.NOT_A_MEMBER, "")
+        );
+    }
 
+    @PostMapping(value ="/createWithoutFile",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseObject> createCommentWithoutFile(Principal principal,
+                                                        @RequestPart("url") String postUrl,
+                                                        @RequestPart("anonymous") @Pattern(regexp = "^(true|false)$",
+                                                                message = "Anonymous must be 'true' or 'false'") String anonymous,
+                                                        @RequestPart("content") @NotBlank(message = "Title must not be blank")
+                                                        @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String content) {
+
+        User user = authService.getCurrentUserById(principal);
+
+        boolean isAnonymous = Boolean.parseBoolean(anonymous);
+        boolean checkComment = userCommunityService.isUserMemberOfSameCommunity(user.getId(),postUrl);
+
+        if(checkComment){
+
+            Post post = postService.findByUrl(postUrl);
+
+            Comment comment = new Comment();
+            comment.setAnonymous(isAnonymous);
+            comment.setContent(content);
+            comment.setAuth(user.getId());
+            comment.setUser(user);
+            comment.setPost(post);
+
+            comment = commentService.save(comment);
 
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", ResponseMessage.CREATED, CommentSuccDto.fromEntity(comment))
@@ -86,11 +120,5 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("NOTOK", ResponseMessage.NOT_A_MEMBER, "")
         );
-
-
-
-
-
-
     }
 }

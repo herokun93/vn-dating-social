@@ -27,10 +27,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.security.Principal;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @Slf4j
@@ -229,11 +226,11 @@ public class PostController {
 //        // Handle the file upload here
 //    }
 
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create" , consumes = "multipart/form-data")
     public ResponseEntity<ResponseObject> createPostToCommunity(Principal principal,
-                                                     @RequestPart("files") List<MultipartFile> files,
+                                                     @RequestPart(value ="files") List<MultipartFile> files,
                                                      @RequestPart("content") @NotBlank(message = "Title must not be blank")
-                                                     @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String content,
+                                                     @Size(min = 3, max = 3000, message = "Title must be between 3 and 3000 characters") String content,
                                                      @RequestPart("anonymous") @Pattern(regexp = "^(true|false)$",
                                                              message = "Anonymous must be 'true' or 'false'") String anonymous,
                                                      @RequestPart("community") @Pattern(regexp = "^[a-z0-9]+$",
@@ -261,6 +258,7 @@ public class PostController {
             newPost.setContent(content);
             newPost.setAnonymous(isAnonymous);
             newPost.setCommunity(communityOptional.get());
+            newPost.setAuth(user.getId());
 
             if(approval){
                 newPost.setState(PostStatus.ACCEPTED);
@@ -268,17 +266,73 @@ public class PostController {
                 newPost.setState(PostStatus.PENDING);
             }
 
-            List<String> listMedia =  mediaService.onlySaveListFileToLocal(files,false);
 
-
-            Set<Media> mediaItems = new HashSet<>();
-            for (String mediaPath : listMedia) {
-                Media media = new Media();
-                media.setPath(mediaPath);
-                media.setPost(newPost); // Associate media with the post
-                mediaItems.add(media);
+            if (files == null || files.isEmpty()) {
+            }else{
+                List<String> listMedia =  mediaService.onlySaveListFileToLocal(files,false);
+                Set<Media> mediaItems = new HashSet<>();
+                for (String mediaPath : listMedia) {
+                    Media media = new Media();
+                    media.setPath(mediaPath);
+                    media.setPost(newPost); // Associate media with the post
+                    mediaItems.add(media);
+                }
+                if(mediaItems.size()>0){
+                    newPost.setMedia(mediaItems);
+                }
             }
-            newPost.setMedia(mediaItems);
+
+
+
+
+            newPost = postService.save(newPost);
+
+
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.CREATED, PostCreateSuccDto.fromEntity(newPost))
+            );
+
+        }
+    }
+
+    @PostMapping(value = "/createWithoutFile" , consumes = "multipart/form-data")
+    public ResponseEntity<ResponseObject> createPostToCommunityWithoutFile(Principal principal,
+                                                                @RequestPart("content") @NotBlank(message = "Title must not be blank")
+                                                                @Size(min = 3, max = 3000, message = "Title must be between 3 and 3000 characters") String content,
+                                                                @RequestPart("anonymous") @Pattern(regexp = "^(true|false)$",
+                                                                        message = "Anonymous must be 'true' or 'false'") String anonymous,
+                                                                @RequestPart("community") @Pattern(regexp = "^[a-z0-9]+$",
+                                                                        message = "Name must consist of lowercase letters (a-z) and digits (0-9) only, with no spaces") String community,
+                                                                @RequestPart("title") @NotBlank(message = "Title must not be blank")
+                                                                @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String title) {
+
+        boolean isAnonymous = Boolean.parseBoolean(anonymous);
+        User user = authService.getCurrentUserById(principal);
+
+
+        boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(user.getId(), community);
+        if(!check){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("NOTOK", ResponseMessage.NOT_A_MEMBER, "")
+
+            );
+        }else{
+            Optional<Community> communityOptional = communityService.getCommunityByName(community);
+            boolean approval = communityOptional.get().isApproval();
+
+            Post newPost = new Post();
+            newPost.setAuthor(user);
+            newPost.setTitle(title);
+            newPost.setContent(content);
+            newPost.setAnonymous(isAnonymous);
+            newPost.setCommunity(communityOptional.get());
+            newPost.setAuth(user.getId());
+
+            if(approval){
+                newPost.setState(PostStatus.ACCEPTED);
+            }else{
+                newPost.setState(PostStatus.PENDING);
+            }
 
             newPost = postService.save(newPost);
 

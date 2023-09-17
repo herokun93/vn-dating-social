@@ -17,11 +17,7 @@ import java.util.stream.Collectors;
 @Setter
 @ToString
 @NoArgsConstructor
-public class ComunityPostHeaderResultDto {
-//    private String username;
-//    private String userId;
-//    private String community;
-//    private String avatar;
+public class CommunityPostHeaderResultDto {
     private CreateByDto createBy;
     boolean anonymous;
     private String community;
@@ -35,9 +31,9 @@ public class ComunityPostHeaderResultDto {
     private Instant createdAt;
     private Instant updatedAt;
 
-    public static ComunityPostHeaderResultDto fromEntity(Post post){
+    public static CommunityPostHeaderResultDto fromEntity(Post post){
 
-        ComunityPostHeaderResultDto postheaderResultDtoComunity = new ComunityPostHeaderResultDto();
+        CommunityPostHeaderResultDto postheaderResultDtoComunity = new CommunityPostHeaderResultDto();
         Community getCommunity = post.getCommunity();
 
         boolean anonymous = post.isAnonymous();
@@ -73,9 +69,9 @@ public class ComunityPostHeaderResultDto {
 
     }
 
-    public static List<ComunityPostHeaderResultDto> fromEntities(List<Post> posts) {
+    public static List<CommunityPostHeaderResultDto> fromEntities(List<Post> posts) {
         return posts.stream()
-                .map(ComunityPostHeaderResultDto::fromEntity)
+                .map(CommunityPostHeaderResultDto::fromEntity)
                 .collect(Collectors.toList());
     }
 

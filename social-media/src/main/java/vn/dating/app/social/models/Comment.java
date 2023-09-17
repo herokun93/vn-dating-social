@@ -3,6 +3,7 @@ package vn.dating.app.social.models;
 import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.validator.constraints.Length;
 import vn.dating.common.models.audit.DateAudit;
 
 import javax.persistence.*;
@@ -19,6 +20,7 @@ public class Comment  extends DateAudit {
     private Long id;
 
     @Column(nullable = false)
+    @Length(max = 2000) // Set the maximum length to 50 characters
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)

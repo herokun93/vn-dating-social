@@ -48,6 +48,16 @@ public class AuthService {
         }
     }
 
+    public boolean isUser(Principal principal) {
+
+        if(principal==null){
+            return false;
+        }
+        return true;
+
+    }
+
+
 
 
 //    public CommunityPageMemberDto getCommunitiesByCommunityName(String communityName, int page, int size) {

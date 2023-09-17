@@ -104,6 +104,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                                 .pathMatchers("/api/social/posts/upload/**").permitAll()
                                 .pathMatchers("/api/social/posts/**").permitAll()
                                 .pathMatchers("/api/social/media/**").permitAll()
+                                .pathMatchers("/api/social/open/**").permitAll()
                                 .pathMatchers("/api/social/communities/**").permitAll()
                                 .pathMatchers("/api/social/posts/public").permitAll()
                                 .pathMatchers("/api/social/public").permitAll()

@@ -18,9 +18,11 @@ import vn.dating.app.social.services.AuthService;
 import vn.dating.app.social.services.CommunityService;
 import vn.dating.app.social.services.PostService;
 import vn.dating.app.social.services.UserCommunityService;
+import vn.dating.common.community.OderCommunity;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -165,6 +167,31 @@ public class CommunityController {
     }
 
 
+
+    @GetMapping("/view")
+    public ResponseEntity<ResponseObject> getViewCommunity(Principal principal,
+                                                           @RequestParam("communityName") String communityName){
+
+        Optional<Community> communityOptional = communityService.getCommunityByName(communityName);
+        if(communityOptional.isPresent()){
+            Community community = communityOptional.get();
+            if(community.getType()==CommunityType.PUBLIC){
+
+            }
+            if(community.getType()==CommunityType.PRIVATE){
+                User user = authService.getCurrentUserById(principal);
+                boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityId(user.getId(), community.getId());
+            }
+
+        }
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+
+                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,"")
+
+        );
+    }
     @GetMapping("/ismember")
     public ResponseEntity<ResponseObject> checkIsMember(Principal principal,
                                                 @Valid @RequestBody CommunityIsMemberDto communityIsMemberDto) {
@@ -251,18 +278,139 @@ public class CommunityController {
     }
 
     @GetMapping("/post")
-    public ResponseEntity<ResponseObject> getPageOfCommunity(// @RequestBody CommunityByName communityByName,
-                                                             @RequestParam() String name ,
-                                                                  @RequestParam(defaultValue = "0") int page,
-                                                                  @RequestParam(defaultValue = "10") int size
-                                                             ) {
+    public ResponseEntity<ResponseObject> getPageOfCommunity(@RequestParam() String name ,
+                                                             Principal principal,
+                                                             @RequestParam(defaultValue = "0") int page,
+                                                             @RequestParam(defaultValue = "10") int size) {
 
-        log.info("get post of communities");
+//        boolean communityExist = communityService.getCommunityByName(name).isPresent();
+
+        Optional<Community> community = communityService.getCommunityByName(name);
+
+        if(community.isEmpty()){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.NOT_FOUND,"Community not exist")
+
+            );
+        }
+
+
+
+
+        if(community.get().getType().equals(CommunityType.PRIVATE)){
+
+            boolean isUser = authService.isUser(principal);
+
+            if(!isUser){
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.NOT_MEMBER,"Not member")
+
+                );
+            }
+
+            boolean isMemberOfCommunity =userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(principal.getName(), name);;
+
+            if(!isMemberOfCommunity){
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.NOT_MEMBER,"Community private")
+
+                );
+            }
+        }
+
 
         CommunityPageHeaderPostDto communityPageHeaderPostDto =  postService.findByCommunityNameOrderByCreatedAtDesc(name, page, size);
 
+        if(authService.isUser(principal)){
+            boolean isMemberOfCommunity =userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(principal.getName(), name);;
+
+            if(isMemberOfCommunity){
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.IS_MEMBER,communityPageHeaderPostDto)
+
+                );
+            }
+
+
+        }
+
+
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityPageHeaderPostDto)
+                new ResponseObject("OK", ResponseMessage.PUBLIC,communityPageHeaderPostDto)
+
+        );
+
+
+    }
+
+    @GetMapping("/open")
+    public ResponseEntity<ResponseObject> openCommunity(@RequestParam() String name ,
+                                                             Principal principal,
+                                                             @RequestParam(defaultValue = "0") int page,
+                                                             @RequestParam(defaultValue = "10") int size) {
+
+        Optional<Community> community = communityService.getCommunityByName(name);
+
+        if(community.isEmpty()){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.NOT_FOUND,"Community not exist")
+
+            );
+        }
+
+
+
+
+        if(community.get().getType().equals(CommunityType.PRIVATE)){
+
+            boolean isUser = authService.isUser(principal);
+
+            if(!isUser){
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.NOT_MEMBER,"Not member")
+
+                );
+            }
+
+            boolean isMemberOfCommunity =userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(principal.getName(), name);;
+
+            if(!isMemberOfCommunity){
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.NOT_MEMBER,"Community private")
+
+                );
+            }
+        }
+
+
+        CommunityOpenDto communityOpenDto =  postService.openCommunityByCommunity(community.get(), page, size);
+
+        if(authService.isUser(principal)){
+            boolean isMemberOfCommunity =userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(principal.getName(), name);;
+
+            if(isMemberOfCommunity){
+                List<String>  listOderCommunity = OderCommunity.getList();
+                boolean checkIsOder = true;
+                for (int index =0;index<listOderCommunity.size();index++ ){
+                    if(listOderCommunity.get(index).contains(name)){
+                        checkIsOder = false;
+                    }
+                }
+
+                log.info(checkIsOder+"");
+                communityOpenDto.getCommunity().setWritePost(checkIsOder);
+
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.IS_MEMBER,communityOpenDto)
+                );
+            }
+
+
+        }
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", ResponseMessage.PUBLIC,communityOpenDto)
 
         );
     }

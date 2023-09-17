@@ -28,7 +28,7 @@ public class Post extends DateAudit {
     private Long id;
 
     @Column(nullable = false)
-    @Length(max = 1000) // Set the maximum length to 50 characters
+    @Length(max = 5000) // Set the maximum length to 50000 characters
     private String content;
 
     @Column(nullable = false)

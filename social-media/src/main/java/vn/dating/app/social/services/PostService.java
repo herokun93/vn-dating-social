@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import vn.dating.app.social.dto.MediaDetailsDto;
+import vn.dating.app.social.dto.community.CommunityOpenDto;
 import vn.dating.app.social.dto.community.CommunityPageHeaderPostDto;
 import vn.dating.app.social.dto.post.PostDetailDto;
 import vn.dating.app.social.dto.post.PostDetailsDto;
@@ -12,6 +13,7 @@ import vn.dating.app.social.dto.post.PostViewDto;
 import vn.dating.app.social.mapper.MediaMapper;
 import vn.dating.app.social.mapper.PostMapper;
 import vn.dating.app.social.models.Comment;
+import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.Post;
 import vn.dating.app.social.models.User;
 import vn.dating.app.social.repositories.PostRepository;
@@ -53,6 +55,18 @@ public class PostService {
         Page<Post> postPage = postRepository.findByCommunityNameOrderByCreatedAtDesc( communityName,  pageable);
         CommunityPageHeaderPostDto communityPageHeaderPostDto = new CommunityPageHeaderPostDto(postPage);
         return communityPageHeaderPostDto;
+    }
+
+    public CommunityOpenDto openCommunityByCommunity(Community community, int page, int size){
+        String communityName = community.getName();
+
+
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> postPage = postRepository.findByCommunityNameOrderByCreatedAtDesc( communityName,  pageable);
+        CommunityOpenDto communityOpenDto = new CommunityOpenDto(community,postPage);
+
+        return communityOpenDto;
     }
 
     public PostDetailsDto getPostDetailsByUrl(String postUrl, int page, int size){

@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.Page;
 import vn.dating.app.social.dto.comment.CommentPageDetails;
-import vn.dating.app.social.dto.community.ComunityPostHeaderResultDto;
 import vn.dating.app.social.dto.community.CreateByDto;
 import vn.dating.app.social.models.Comment;
 import vn.dating.app.social.models.Community;
@@ -15,7 +14,6 @@ import vn.dating.app.social.models.User;
 import vn.dating.app.social.utils.UtilsAvatar;
 
 import java.time.Instant;
-import java.util.List;
 
 @Getter
 @Setter

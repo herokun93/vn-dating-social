@@ -7,17 +7,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.dating.app.social.dto.community.CommunityNewDto;
 import vn.dating.app.social.dto.community.CommunityPageDto;
+import vn.dating.app.social.dto.community.other.CommunitiesOtherDto;
+import vn.dating.app.social.dto.community.other.CommunityOtherBase;
+import vn.dating.app.social.dto.open.AuthDto;
+import vn.dating.app.social.dto.open.OpenHomeDto;
 import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.User;
 import vn.dating.app.social.models.UserCommunity;
-import vn.dating.app.social.models.eenum.CommunityType;
 import vn.dating.app.social.models.eenum.UserCommunityRoleType;
 import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.app.social.repositories.CommunityRepository;
 import vn.dating.app.social.repositories.UserCommunityRepository;
+import vn.dating.app.social.repositories.UserRepository;
+import vn.dating.common.community.OderCommunity;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class CommunityService {
@@ -25,11 +33,17 @@ public class CommunityService {
     private CommunityRepository communityRepository;
 
     @Autowired
+    private UserRepository authRepository;
+    @Autowired
     private UserCommunityRepository userCommunityRepository;
 
     public Community createCommunity(User user,CommunityNewDto communityNewDto) {
 
         String creatorId = user.getId();
+        Random random = new Random();
+        int randomNumber = random.nextInt(7) + 1; // Generates a random number between 0 and 7, then adds 1
+        System.out.println("Random number between 1 and 10: " + randomNumber);
+        String avatar = "cat"+randomNumber+".jpeg";
 
         Community community = new Community();
         community.setName(communityNewDto.getName());
@@ -38,6 +52,7 @@ public class CommunityService {
         community.setType(communityNewDto.getType());
         community.setApproval(communityNewDto.isApproval());
         community.setAuth(creatorId);
+        community.setAvatar(avatar);
 
         community = communityRepository.save(community);
         UserCommunity userCommunity = new UserCommunity();
@@ -78,6 +93,43 @@ public class CommunityService {
         Page<Community> communityPage = communityRepository.findCommunitiesByMemberUserId( userId,  pageable);
         CommunityPageDto communityPageDto = new CommunityPageDto(communityPage);
         return communityPageDto;
+    }
+
+    public CommunitiesOtherDto getOtherCommunities(){
+
+
+        CommunitiesOtherDto communitiesOtherDto = new CommunitiesOtherDto();
+
+        for(int index = 0; index< OderCommunity.getList().size(); index++){
+            Community community = communityRepository.findByName(OderCommunity.getList().get(index)).get();
+            communitiesOtherDto.getData().add(new CommunityOtherBase(community));
+        }
+        return communitiesOtherDto;
+
+    }
+
+    public OpenHomeDto openHomeDto(Principal principal){
+        OpenHomeDto openHomeDto = new OpenHomeDto();
+
+        CommunityPageDto communities = new CommunityPageDto();
+        AuthDto authDto = new AuthDto();
+
+        if(principal==null){
+
+        }else{
+            communities = getCommunitiesOfUser(principal.getName(), 0, 10);
+            Optional<User> auth =authRepository.findById(principal.getName());
+            if(auth.isPresent()){
+                authDto = new AuthDto(auth.get());
+            }
+        }
+
+        openHomeDto.setCommunities(communities);
+        openHomeDto.setCommunitiesOther(getOtherCommunities());
+        openHomeDto.setAuth(authDto);
+
+        return openHomeDto;
+
     }
     public List<Community> getAllCommunities() {
         return communityRepository.findAll();
