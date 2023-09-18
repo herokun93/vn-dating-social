@@ -45,8 +45,14 @@ public class CommentDetails {
         commentDetails.setCreatedAt(comment.getCreatedAt());
         commentDetails.setUpdatedAt(comment.getUpdatedAt());
         commentDetails.setContent(comment.getContent());
-        commentDetails.setCLikes(comment.getLikes().size());
-        commentDetails.setCReplies(comment.getReplies().size());
+        if(comment.getLikes()==null){
+
+        }else commentDetails.setCLikes(comment.getLikes().size());
+
+        if(comment.getReplies()==null){
+
+        }else commentDetails.setCReplies(comment.getReplies().size());
+
 
         commentDetails.setCreateBy(createByDto);
 

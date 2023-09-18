@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.dating.app.social.dto.ResponseMessage;
 import vn.dating.app.social.dto.ResponseObject;
+import vn.dating.app.social.dto.comment.CommentDetails;
 import vn.dating.app.social.dto.comment.CommentSuccDto;
 import vn.dating.app.social.models.Comment;
 import vn.dating.app.social.models.Media;
@@ -113,7 +114,7 @@ public class CommentController {
             comment = commentService.save(comment);
 
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", ResponseMessage.CREATED, CommentSuccDto.fromEntity(comment))
+                    new ResponseObject("OK", ResponseMessage.CREATED, CommentDetails.fromEntity(comment))
             );
 
         }
