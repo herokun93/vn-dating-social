@@ -20,17 +20,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findUsersByCommunities_Community_Name(String communityName, Pageable pageable);
 
-    @Query("SELECT new vn.dating.app.social.dto.community.CommunityUserResultDto(u.id, u.email, u.username, u.firstName, u.lastName, uc.type, uc.role) " +
+    @Query("SELECT new vn.dating.app.social.dto.community.CommunityUserResultDto(u.id, u.email, u.username, u.firstName, u.lastName, uc.status, uc.role) " +
             "FROM User u " +
             "JOIN u.communities uc " +
             "WHERE uc.community.name = :communityName")
     Page<CommunityUserResultDto> findUsersByCommunityName(String communityName, Pageable pageable);
 
-    @Query("SELECT new vn.dating.app.social.dto.community.CommunityUserResultDto(u.id, u.email, u.username, u.firstName, u.lastName, uc.type, uc.role) " +
+    @Query("SELECT new vn.dating.app.social.dto.community.CommunityUserResultDto(u.id, u.email, u.username, u.firstName, u.lastName, uc.status, uc.role) " +
             "FROM User u " +
             "JOIN u.communities uc " +
             "WHERE uc.community.name = :communityName " +
-            "AND uc.type = :userCommunityType")
+            "AND uc.status = :userCommunityType")
     Page<CommunityUserResultDto> getUsersByCommunityNameAndUserType(
             String communityName, UserCommunityType userCommunityType, Pageable pageable);
 }

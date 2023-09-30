@@ -18,11 +18,9 @@ import vn.dating.app.social.services.AuthService;
 import vn.dating.app.social.services.CommunityService;
 import vn.dating.app.social.services.PostService;
 import vn.dating.app.social.services.UserCommunityService;
-import vn.dating.common.community.OderCommunity;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -70,60 +68,87 @@ public class CommunityController {
     @PostMapping("/join")
     public ResponseEntity<ResponseObject> joinCommunity(Principal principal,
                                                         @Valid @RequestBody CommunityJoinDto communityJoinDto) {
-        // Get the current user
-        User user = authService.getCurrentUserById(principal);
 
-        // Check if the community exists
+        User user = authService.getCurrentUserById(principal);
+        String userId = user.getId();
+
         Optional<Community> communityOptional = communityService.getCommunityByName(communityJoinDto.getName());
 
 
 
+
         if (communityOptional.isPresent()) {
-            // Community exists, so add the user to it
             Community community = communityOptional.get();
-            long communityId  = community.getId();
 
-            boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityId(user.getId(), communityId);
-            if(check){
+            Optional<UserCommunity> getCurrentUserCommunity  = userCommunityService.findByUserIdAndCommunityName(userId,community.getName());
+            CommunityResultDto communityResultDto = CommunityResultDto.fromEntity(community);
+
+            if(!getCurrentUserCommunity.isEmpty()){
+
+                UserCommunityType status = getCurrentUserCommunity.get().getStatus();
+
+
+
+                if(status == UserCommunityType.LEAVE) {
+
+                    userCommunityService.updateUserCommunity(getCurrentUserCommunity.get(), UserCommunityType.ACTIVATED);
+                    communityResultDto.setStatus(UserCommunityType.ACTIVATED);
+
+                } else if(status == UserCommunityType.BLOCK) {
+                    communityResultDto.setStatus(UserCommunityType.BLOCK);
+
+                } else if(status == UserCommunityType.PENDING) {
+                    communityResultDto.setStatus(UserCommunityType.PENDING);
+
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                            new ResponseObject("NOTOK", ResponseMessage.NOT_WORKING, "")
+                    );
+                }
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", ResponseMessage.EXISTS, CommunityResultDto.fromEntity(community))
-
+                        new ResponseObject("OK", ResponseMessage.SUCCESSFUL, communityResultDto)
                 );
             }
 
             UserCommunity userCommunity = new UserCommunity();
             userCommunity.setUser(user);
             userCommunity.setCommunity(community);
+            userCommunity.setAuth(user.getId());
 
             CommunityType communityType = community.getType();
+
 
             boolean checkCommunityType = (communityType == CommunityType.PRIVATE || communityType ==CommunityType.PROTECTED );
 
             if(checkCommunityType){
-                userCommunity.setType(UserCommunityType.PENDING);
+                userCommunity.setStatus( UserCommunityType.PENDING);
+                communityResultDto.setStatus(UserCommunityType.PENDING);
             }else{
-                userCommunity.setType(UserCommunityType.ACTIVATED);
+                userCommunity.setStatus(UserCommunityType.ACTIVATED);
+                communityResultDto.setStatus(UserCommunityType.ACTIVATED);
             }
+
+
             userCommunity.setRole(UserCommunityRoleType.USER);
-
-
             userCommunityService.save(userCommunity);
 
-            // You can return a success response or any other response as needed
+
             if(checkCommunityType){
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", ResponseMessage.WANTING, CommunityResultDto.fromEntity(community))
+                        new ResponseObject("OK", ResponseMessage.SUCCESSFUL, communityResultDto)
 
                 );
             }
+
+
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", ResponseMessage.CREATED, CommunityResultDto.fromEntity(community))
+
+                    new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityResultDto)
 
             );
         } else {
-            // Community doesn't exist, return a bad request response or handle it as needed
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("NOTOK", ResponseMessage.NOT_FOUND,"")
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("NOTOK",ResponseMessage.NOT_WORKING,"")
 
             );
         }
@@ -132,34 +157,53 @@ public class CommunityController {
 
     @PostMapping("/leave")
     public ResponseEntity<ResponseObject> leaveCommunity(Principal principal,
-                                                         @RequestParam("communityName") String communityName) {
+                                                         @Valid @RequestBody CommunityJoinDto communityJoinDto) {
         // Get the current user
         User user = authService.getCurrentUserById(principal);
 
         // Check if the community exists
-        Optional<Community> communityOptional = communityService.getCommunityByName(communityName);
+        Optional<Community> communityOptional = communityService.getCommunityByName(communityJoinDto.getName());
 
         if (communityOptional.isPresent()) {
             // Community exists, so attempt to leave it
             Community community = communityOptional.get();
 
-            boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityId(user.getId(), community.getId());
+//            boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityId(user.getId(), community.getId());
 
-            if (check) {
-                // User is a member, proceed to remove them from the community
-                userCommunityService.leaveCommunity(user.getId(), community.getId());
+            Optional<UserCommunity> userCommunity = userCommunityService.findByUserIdAndCommunityName(user.getId(), community.getName());
+
+            CommunityResultDto communityResultDto = CommunityResultDto.fromEntity(community);
+
+            if (userCommunity.isPresent()) {
+
+                UserCommunityType getCurrentUserCommunityType = userCommunity.get().getStatus();
+
+                if(userCommunity.get().getRole() ==UserCommunityRoleType.ADMIN){
+                    communityResultDto.setStatus(UserCommunityType.ACTIVATED);
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject("OK", ResponseMessage.NOT_WORKING, communityResultDto)
+                    );
+                }else{
+
+
+
+                    if(getCurrentUserCommunityType ==UserCommunityType.ACTIVATED){
+                        getCurrentUserCommunityType= UserCommunityType.LEAVE;
+                    }
+                    userCommunityService.updateUserCommunity(userCommunity.get(),getCurrentUserCommunityType);
+                    communityResultDto.setStatus(getCurrentUserCommunityType);
+                }
 
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", ResponseMessage.DELETED, CommunityResultDto.fromEntity(community))
+
+                        new ResponseObject("OK", ResponseMessage.DELETED, communityResultDto)
                 );
             } else {
-                // User is not a member of the community, return a response accordingly
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        new ResponseObject("NOTOK", ResponseMessage.NOT_A_MEMBER, "")
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.NOT_A_MEMBER, "")
                 );
             }
         } else {
-            // Community doesn't exist, return a bad request response or handle it as needed
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("NOTOK", ResponseMessage.NOT_FOUND, "")
             );
@@ -257,7 +301,11 @@ public class CommunityController {
 
 
 
-        CommunityPageDto  communityPageDto = communityService.getCommunitiesOfUser(user.getId(), page, size);
+        CommunityPageDto  communityPageDto = communityService.findCommunitiesByMemberUserIdAndType(user.getId(), page, size);
+
+
+
+
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityPageDto)
 
@@ -349,6 +397,7 @@ public class CommunityController {
                                                              @RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
 
+
         Optional<Community> community = communityService.getCommunityByName(name);
 
         if(community.isEmpty()){
@@ -359,15 +408,13 @@ public class CommunityController {
         }
 
 
-
-
         if(community.get().getType().equals(CommunityType.PRIVATE)){
 
             boolean isUser = authService.isUser(principal);
 
             if(!isUser){
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", ResponseMessage.NOT_MEMBER,"Not member")
+                        new ResponseObject("OK", ResponseMessage.NOT_MEMBER_PRIVATE_COMMUNITY,"not member of private community")
 
                 );
             }
@@ -376,41 +423,39 @@ public class CommunityController {
 
             if(!isMemberOfCommunity){
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", ResponseMessage.NOT_MEMBER,"Community private")
-
+                        new ResponseObject("OK", ResponseMessage.NOT_MEMBER_PRIVATE_COMMUNITY,"Community private")
                 );
             }
         }
 
-
-        CommunityOpenDto communityOpenDto =  postService.openCommunityByCommunity(community.get(), page, size);
+        CommunityOpenDto communityOpenDto =  postService.openCommunityByCommunityName(community.get(), page, size);
 
         if(authService.isUser(principal)){
-            boolean isMemberOfCommunity =userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(principal.getName(), name);;
+            Optional<UserCommunity> userCommunity = userCommunityService.findByUserIdAndCommunityName(principal.getName(), name);
+//            boolean isMemberOfCommunity =userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(principal.getName(), name);;
 
-            if(isMemberOfCommunity){
-                List<String>  listOderCommunity = OderCommunity.getList();
-                boolean checkIsOder = true;
-                for (int index =0;index<listOderCommunity.size();index++ ){
-                    if(listOderCommunity.get(index).contains(name)){
-                        checkIsOder = false;
-                    }
+            if(userCommunity.isPresent()){
+                if(userCommunity.get().getRole().equals(UserCommunityRoleType.ADMIN)){
+                    communityOpenDto.setRole(UserCommunityRoleType.ADMIN);
+                    communityOpenDto.setStatus(UserCommunityType.ACTIVATED);
+                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityOpenDto)
+                    );
                 }
 
-                log.info(checkIsOder+"");
-                communityOpenDto.getCommunity().setWritePost(checkIsOder);
-
+                communityOpenDto.setRole(UserCommunityRoleType.USER);
+                communityOpenDto.setStatus(userCommunity.get().getStatus());
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", ResponseMessage.IS_MEMBER,communityOpenDto)
+
+                        new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityOpenDto)
                 );
+
             }
-
-
         }
 
-
+        communityOpenDto.setRole(UserCommunityRoleType.NOT_USER);
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK", ResponseMessage.PUBLIC,communityOpenDto)
+
+                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,communityOpenDto)
 
         );
     }

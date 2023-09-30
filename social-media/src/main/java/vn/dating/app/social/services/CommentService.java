@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import vn.dating.app.social.dto.comment.CommentDetails;
 import vn.dating.app.social.dto.comment.CommentPageDetails;
 import vn.dating.app.social.dto.community.CommunityPageDto;
 import vn.dating.app.social.dto.post.PostDetailDto;
@@ -15,6 +16,7 @@ import vn.dating.app.social.models.Comment;
 import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.Post;
 import vn.dating.app.social.models.User;
+import vn.dating.app.social.models.eenum.PostStatus;
 import vn.dating.app.social.repositories.CommentRepository;
 import vn.dating.app.social.utils.PagedResponse;
 import vn.dating.app.social.utils.TimeHelper;
@@ -96,6 +98,18 @@ public class CommentService {
         }
 
         return new PagedResponse<>(CommentMapper.toGetComments(comments.stream().toList()), comments.getNumber(), comments.getSize(), comments.getTotalElements(),
+                comments.getTotalPages(), comments.isLast());
+    }
+    public PagedResponse findCommentsByPostUrlAndState(String postUrl, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Comment> comments = commentRepository.findByPost_UrlAndPost_State(postUrl, PostStatus.ACCEPTED,pageable);
+
+        if(comments.getNumberOfElements()==0){
+            return new PagedResponse<>(Collections.emptyList(), comments.getNumber(), comments.getSize(),
+                    comments.getTotalElements(), comments.getTotalPages(), comments.isLast());
+        }
+
+        return new PagedResponse<>(CommentDetails.fromEntities(comments.stream().toList()), comments.getNumber(), comments.getSize(), comments.getTotalElements(),
                 comments.getTotalPages(), comments.isLast());
     }
 

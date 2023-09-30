@@ -11,6 +11,8 @@ import vn.dating.app.social.models.Comment;
 import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.Post;
 import vn.dating.app.social.models.User;
+import vn.dating.app.social.models.eenum.UserCommunityRoleType;
+import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.app.social.utils.UtilsAvatar;
 
 import java.time.Instant;
@@ -21,6 +23,9 @@ import java.time.Instant;
 @NoArgsConstructor
 public class PostDetailsDto {
     private CreateByDto createBy;
+    private UserCommunityType type;
+    private UserCommunityRoleType role;
+
     boolean anonymous;
     private String community;
 
@@ -28,6 +33,7 @@ public class PostDetailsDto {
     private String url;
     private int cComments;
     private int cLikes;
+    private int react=0;
 
     private String content;
     private Instant createdAt;
@@ -64,6 +70,14 @@ public class PostDetailsDto {
 
         postDetailsDto.setCreateBy(createByDto);
         postDetailsDto.setComments(new CommentPageDetails(commentPage));
+
+        if(!post.getLikes().isEmpty()){
+            postDetailsDto.setCLikes(post.getLikes().size());
+        }
+        if(!post.getComments().isEmpty()){
+            postDetailsDto.setCComments(post.getComments().size());
+        }
+
 
         return postDetailsDto;
 

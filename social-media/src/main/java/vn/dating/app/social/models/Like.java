@@ -38,9 +38,7 @@ public class Like  extends DateAudit {
     @JoinColumn(name = "reply_id")
     private Reply reply;
 
-    @Enumerated(EnumType.STRING)
-    private ReactType react;
 
-    @Enumerated(EnumType.STRING)
-    private LikeModeType type;
+    private int  react;
+
 }

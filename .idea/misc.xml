@@ -14,6 +14,8 @@
         <option value="$PROJECT_DIR$/keycloak-service/pom.xml" />
         <option value="$PROJECT_DIR$/notification-service/pom.xml" />
         <option value="$PROJECT_DIR$/order-service/pom.xml" />
+        <option value="$PROJECT_DIR$/realtime-service/pom.xml" />
+        <option value="$PROJECT_DIR$/reatime-service/pom.xml" />
       </set>
     </option>
   </component>

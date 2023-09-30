@@ -3,15 +3,12 @@ package vn.dating.app.social.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import vn.dating.app.social.dto.community.CommunityPageDto;
-import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.UserCommunity;
-import vn.dating.app.social.repositories.CommunityRepository;
+import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.app.social.repositories.UserCommunityRepository;
+
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -32,8 +29,29 @@ public class UserCommunityService {
     }
 
     public boolean isUserMemberOfSameCommunity(String userId,String postUrl){
+
         return  userCommunityRepository.isUserMemberOfSameCommunity(userId,postUrl);
     }
+    public void deleteUserCommunity(UserCommunity userCommunity){
+        userCommunityRepository.delete(userCommunity);
+    }
+
+    public void leaveUserCommunity(UserCommunity userCommunity){
+        userCommunity.setStatus(UserCommunityType.LEAVE);
+        userCommunityRepository.saveAndFlush(userCommunity);
+    }
+    public UserCommunity updateUserCommunity(UserCommunity userCommunity,UserCommunityType userCommunityType){
+        userCommunity.setStatus(userCommunityType);
+        return userCommunityRepository.save(userCommunity);
+    }
+    public Optional<UserCommunity> findByUserIdAndCommunityName(String userId, String communityName){
+        return userCommunityRepository.findByUser_IdAndCommunity_Name(userId, communityName);
+    }
+//    public Optional<UserCommunity> findByUserIdAndCommunityAndType(String userId, String communityName){
+//        return userCommunityRepository.findByUser_IdAndCommunity_NameAndType(userId, communityName,UserCommunityType.ACTIVATED);
+//    }
+
+
 
 
 

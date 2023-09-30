@@ -7,8 +7,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="auth-service" />
+        <module name="keyloak-service" />
         <module name="discovery-server" />
         <module name="common" />
+        <module name="socket-service" />
         <module name="api-gateway" />
         <module name="chat-service" />
         <module name="social-medial" />
@@ -22,6 +24,8 @@
       <module name="notification-service" target="17" />
       <module name="order-service" target="17" />
       <module name="product-service" target="17" />
+      <module name="realtime-service" target="20" />
+      <module name="reatime-service" target="20" />
       <module name="vn.dating.common" target="18" />
     </bytecodeTargetLevel>
   </component>
@@ -35,11 +39,15 @@
       <module name="discovery-server" options="-parameters" />
       <module name="inventory-service" options="-parameters" />
       <module name="keycloak-service" options="-parameters" />
+      <module name="keyloak-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
       <module name="order-service" options="-parameters" />
       <module name="product-service" options="-parameters" />
+      <module name="realtime-service" options="-parameters" />
+      <module name="reatime-service" options="-parameters" />
       <module name="social-media" options="-parameters" />
       <module name="social-medial" options="-parameters" />
+      <module name="socket-service" options="-parameters" />
       <module name="vn.dating.common" options="-parameters" />
     </option>
   </component>

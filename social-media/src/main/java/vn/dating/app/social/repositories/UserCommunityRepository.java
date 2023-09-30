@@ -8,6 +8,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.UserCommunity;
+import vn.dating.app.social.models.eenum.UserCommunityType;
+
+import java.util.Optional;
 
 
 @Repository
@@ -16,6 +19,19 @@ public interface UserCommunityRepository extends JpaRepository<UserCommunity,Lon
     boolean existsByUser_IdAndCommunity_Id(String userId, Long communityId);
     boolean existsByUser_IdAndCommunity_Name(String userId, String communityName);
     void deleteByUserIdAndCommunityId(String userId, Long communityId);
+
+
+    Optional<UserCommunity> findByUser_IdAndCommunity_Name(String userId, String communityName);
+
+//    @Query("SELECT uc FROM UserCommunity uc " +
+//            "WHERE uc.user.id = :userId " +
+//            "AND uc.community.name = :communityName " +
+//            "AND uc.type = :type")
+//    Optional<UserCommunity>findByUser_IdAndCommunity_NameAndType(
+//            @Param("userId") String userId,
+//            @Param("communityName") String communityName,
+//            @Param("type") UserCommunityType type
+//    );
 
 //    Page<UserCommunity> findByUserId(String userId, Pageable pageable);
 

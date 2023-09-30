@@ -26,6 +26,7 @@ public class CommunityPostHeaderResultDto {
     private String url;
     private int cComments;
     private int cLikes;
+    private int react=0;
 
     private String content;
     private Instant createdAt;
@@ -49,6 +50,12 @@ public class CommunityPostHeaderResultDto {
             createByDto.setAvatar(UtilsAvatar.toPath(creator.getAvatar()));
         }
 
+        if(!post.getLikes().isEmpty()){
+            postheaderResultDtoComunity.setCLikes(post.getLikes().size());
+        }
+        if(!post.getComments().isEmpty()){
+            postheaderResultDtoComunity.setCComments(post.getComments().size());
+        }
 
 
 

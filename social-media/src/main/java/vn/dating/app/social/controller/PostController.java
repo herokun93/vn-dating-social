@@ -7,20 +7,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.dating.app.social.dto.ResponseMessage;
 import vn.dating.app.social.dto.ResponseObject;
-import vn.dating.app.social.dto.community.CommunityResultDto;
 import vn.dating.app.social.dto.post.PostCreateSuccDto;
 import vn.dating.app.social.dto.post.PostDetailsDto;
 import vn.dating.app.social.models.*;
 import vn.dating.app.social.models.eenum.NotificationType;
 import vn.dating.app.social.models.eenum.PostStatus;
+import vn.dating.app.social.models.eenum.UserCommunityRoleType;
+import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.app.social.services.*;
 import vn.dating.app.social.utils.PagedResponse;
+import vn.dating.common.community.OtherCommunity;
 
 
 import javax.validation.constraints.NotBlank;
@@ -103,24 +104,95 @@ public class PostController {
 //    }
 
     @GetMapping("/url/{url}")
-    public ResponseEntity<ResponseObject> getPost(@PathVariable("url") String url,
-                                  @RequestParam(defaultValue = "0") int page,
-                                  @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<ResponseObject> getPost(
+                                    Principal principal,
+                                    @PathVariable("url") String url,
+                                    @RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "10") int size) {
 
+        boolean isUser = authService.isUser(principal);
+        if(isUser){
+
+        }
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", ResponseMessage.SUCCESSFUL,
                         postService.getPostDetailsByUrl(url,page,size))
-
         );
     }
-    @GetMapping("/{url}/comment")
-    public ResponseEntity getCommentOfPost(@PathVariable("url") String url,
+    @GetMapping("/community/{name}/url/{url}")
+    public ResponseEntity<ResponseObject> getPostByCommunityNameAndPostUrl(
+            Principal principal,
+            @PathVariable("url") String url,
+            @PathVariable("name") String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Post getCurrentPost = postService.findByUrlAndCommunityNameAndState(url,name);
+
+        if(getCurrentPost==null){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.NOT_FOUND, "")
+            );
+        }
+
+
+        PostDetailsDto postDetailsDto =  postService.getPostDetailsByUrl(url,page,size);
+
+        boolean isUser = authService.isUser(principal);
+        if(isUser){
+            Optional<UserCommunity> userCommunity = userCommunityService.findByUserIdAndCommunityName(principal.getName(),name);
+            if(userCommunity.isPresent()){
+                UserCommunityType userCommunityType = userCommunity.get().getStatus();
+
+                postDetailsDto.setType(userCommunityType);
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.SUCCESSFUL,
+                                postDetailsDto)
+                );
+            }
+        }
+        postDetailsDto.setType(UserCommunityType.UNDEFINED);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,
+                        postDetailsDto)
+        );
+    }
+
+    @GetMapping("/community/{name}/url/{url}/comment")
+    public ResponseEntity getCommentOfPost(Principal principal,
+                                           @PathVariable("url") String url,
+                                           @PathVariable("name") String name,
                                            @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "10") int size) {
-        Post post = postService.findByUrl(url);
-        if(post==null) return new ResponseEntity<>("Post not exist",HttpStatus.BAD_REQUEST);
 
-        PagedResponse pagedResponse = commentService.findCommentsByPostUrl(url,page,size);
+        Post getCurrentPost = postService.findByUrlAndCommunityNameAndState(url,name);
+
+        if(getCurrentPost==null){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.NOT_FOUND, "")
+            );
+        }
+
+        boolean isUser = authService.isUser(principal);
+//        if(isUser){
+//            Optional<UserCommunity> userCommunity = userCommunityService.findByUserIdAndCommunityName(principal.getName(),name);
+//            if(userCommunity.isPresent()){
+//                UserCommunityType userCommunityType = userCommunity.get().getStatus();
+//
+//                postDetailsDto.setType(userCommunityType);
+//                return ResponseEntity.status(HttpStatus.OK).body(
+//                        new ResponseObject("OK", ResponseMessage.SUCCESSFUL,
+//                                postDetailsDto)
+//                );
+//            }
+//        }
+//        postDetailsDto.setType(UserCommunityType.UNDEFINED);
+//        return ResponseEntity.status(HttpStatus.OK).body(
+//                new ResponseObject("OK", ResponseMessage.SUCCESSFUL,
+//                        postDetailsDto)
+//        );
+
+        PagedResponse pagedResponse = commentService.findCommentsByPostUrlAndState(url,page,size);
 
         return new ResponseEntity<>(pagedResponse, HttpStatus.OK);
     }
@@ -246,7 +318,6 @@ public class PostController {
         if(!check){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("NOTOK", ResponseMessage.NOT_A_MEMBER, "")
-
             );
         }else{
             Optional<Community> communityOptional = communityService.getCommunityByName(community);
@@ -265,7 +336,6 @@ public class PostController {
             }else{
                 newPost.setState(PostStatus.PENDING);
             }
-
 
             if (files == null || files.isEmpty()) {
             }else{
@@ -282,12 +352,7 @@ public class PostController {
                 }
             }
 
-
-
-
             newPost = postService.save(newPost);
-
-
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", ResponseMessage.CREATED, PostCreateSuccDto.fromEntity(newPost))
             );
@@ -298,7 +363,7 @@ public class PostController {
     @PostMapping(value = "/createWithoutFile" , consumes = "multipart/form-data")
     public ResponseEntity<ResponseObject> createPostToCommunityWithoutFile(Principal principal,
                                                                 @RequestPart("content") @NotBlank(message = "Title must not be blank")
-                                                                @Size(min = 3, max = 3000, message = "Title must be between 3 and 3000 characters") String content,
+                                                                @Size(min = 3, max = 5000, message = "Title must be between 3 and 3000 characters") String content,
                                                                 @RequestPart("anonymous") @Pattern(regexp = "^(true|false)$",
                                                                         message = "Anonymous must be 'true' or 'false'") String anonymous,
                                                                 @RequestPart("community") @Pattern(regexp = "^[a-z0-9]+$",
@@ -307,20 +372,37 @@ public class PostController {
                                                                 @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String title) {
 
         boolean isAnonymous = Boolean.parseBoolean(anonymous);
+
         User user = authService.getCurrentUserById(principal);
 
 
-        boolean check = userCommunityService.doesUserCommunityExistByUserIdAndCommunityName(user.getId(), community);
-        if(!check){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ResponseObject("NOTOK", ResponseMessage.NOT_A_MEMBER, "")
-
+        Optional<UserCommunity> userCommunity = userCommunityService.findByUserIdAndCommunityName(user.getId(),community);
+        if(!userCommunity.isPresent()){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.NOT_FOUND, "")
             );
-        }else{
+        }
+        else{
+
+            UserCommunityType userCommunityType = userCommunity.get().getStatus();;
+            if(userCommunityType == UserCommunityType.BLOCK || userCommunityType ==UserCommunityType.PENDING || userCommunityType ==UserCommunityType.LEAVE){
+
+                PostCreateSuccDto postCreateSuccDto = new PostCreateSuccDto();
+
+                postCreateSuccDto.setType( userCommunityType);
+
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", ResponseMessage.CANNOT_CREATED, postCreateSuccDto)
+                );
+            }
+
             Optional<Community> communityOptional = communityService.getCommunityByName(community);
+
             boolean approval = communityOptional.get().isApproval();
 
             Post newPost = new Post();
+
+
             newPost.setAuthor(user);
             newPost.setTitle(title);
             newPost.setContent(content);
@@ -328,17 +410,42 @@ public class PostController {
             newPost.setCommunity(communityOptional.get());
             newPost.setAuth(user.getId());
 
+
             if(approval){
-                newPost.setState(PostStatus.ACCEPTED);
-            }else{
-                newPost.setState(PostStatus.PENDING);
+
+
+                if(userCommunity.get().getRole()== UserCommunityRoleType.ADMIN){
+                    newPost.setState(PostStatus.ACCEPTED);
+                }else{
+                    newPost.setState(PostStatus.PENDING);
+                }
+
+                newPost = postService.save(newPost);
+
+                PostCreateSuccDto postCreateSuccDto =PostCreateSuccDto.fromEntity(newPost);
+
+                if(userCommunity.get().getRole()== UserCommunityRoleType.ADMIN){
+                    postCreateSuccDto.setType(UserCommunityType.ACTIVATED);
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject("OK", ResponseMessage.SUCCESSFUL, postCreateSuccDto)
+                    );
+
+                }else{
+                    postCreateSuccDto.setType(UserCommunityType.PENDING);
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject("OK", ResponseMessage.SUCCESSFUL, postCreateSuccDto)
+                    );
+                }
             }
+
+
+            newPost.setState(PostStatus.ACCEPTED);
 
             newPost = postService.save(newPost);
 
 
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", ResponseMessage.CREATED, PostCreateSuccDto.fromEntity(newPost))
+                    new ResponseObject("OK", ResponseMessage.SUCCESSFUL, PostCreateSuccDto.fromEntity(newPost))
             );
 
         }

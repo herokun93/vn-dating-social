@@ -13,5 +13,4 @@ public class CommunityBaseDto {
     private String avatar;
     private String description;
     private CommunityType type;
-    private boolean writePost=false;
 }

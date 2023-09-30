@@ -31,7 +31,7 @@ public class UserCommunity extends DateAudit {
     private Community community;
 
     @Enumerated(EnumType.STRING)
-    private UserCommunityType type;
+    private UserCommunityType status;
 
     @Enumerated(EnumType.STRING)
     private UserCommunityRoleType role;

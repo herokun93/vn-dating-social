@@ -16,6 +16,7 @@ import vn.dating.app.social.models.Comment;
 import vn.dating.app.social.models.Community;
 import vn.dating.app.social.models.Post;
 import vn.dating.app.social.models.User;
+import vn.dating.app.social.models.eenum.PostStatus;
 import vn.dating.app.social.repositories.PostRepository;
 import vn.dating.app.social.repositories.UserRepository;
 import vn.dating.app.social.utils.PagedResponse;
@@ -57,13 +58,14 @@ public class PostService {
         return communityPageHeaderPostDto;
     }
 
-    public CommunityOpenDto openCommunityByCommunity(Community community, int page, int size){
+    public CommunityOpenDto openCommunityByCommunityName(Community community, int page, int size){
         String communityName = community.getName();
 
 
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Post> postPage = postRepository.findByCommunityNameOrderByCreatedAtDesc( communityName,  pageable);
+//        Page<Post> postPage = postRepository.findByCommunityNameOrderByCreatedAtDesc( communityName,  pageable);
+        Page<Post> postPage = postRepository.findByCommunityNameAndStateOrderByCreatedAtDesc( communityName, PostStatus.ACCEPTED, pageable);
         CommunityOpenDto communityOpenDto = new CommunityOpenDto(community,postPage);
 
         return communityOpenDto;
@@ -98,6 +100,10 @@ public class PostService {
         return  postRepository.findByUrl(url).orElse(null);
     }
 
+    public Post findByUrlAndAndState(String url){
+        return  postRepository.findByUrlAndAndState(url,PostStatus.ACCEPTED);
+    }
+
     public List<Post> findAll() {
         return postRepository.findAll();
     }
@@ -107,6 +113,15 @@ public class PostService {
         if(post.size()==1) return true;
         else  return  false;
     }
+
+    public Post findByUrlAndCommunityName(String url, String communityName){
+        return  postRepository.findByUrlAndCommunityName(url,communityName);
+    }
+
+    public Post findByUrlAndCommunityNameAndState(String url, String communityName){
+        return  postRepository.findByUrlAndCommunityNameAndState(url,communityName,PostStatus.ACCEPTED);
+    }
+
 
     public void postUpdateTime(Post post){
         post.setUpdatedAt(Instant.now());

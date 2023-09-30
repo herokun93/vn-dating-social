@@ -94,12 +94,13 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                                 .pathMatchers("/api/auth/login").permitAll()
                                 .pathMatchers("/api/auth/verify/**").permitAll()
                                 .pathMatchers("/api/gateway/public").permitAll()
+
                                 .pathMatchers("/api/gateway/gateway/**").permitAll()
                                 .pathMatchers("/api/gateway/private").authenticated()
                                 .pathMatchers("/api/gateway/auth/create").permitAll()
                                 .pathMatchers("/api/gateway/auth/v/**").permitAll()
-                                .pathMatchers("/api/social/auth/create").permitAll()
                                 .pathMatchers("/api/social/auth/public").permitAll()
+                                .pathMatchers("/api/social/auth/create").permitAll()
                                 .pathMatchers("/api/social/posts/create").access(this::isRoleUser)
                                 .pathMatchers("/api/social/posts/upload/**").permitAll()
                                 .pathMatchers("/api/social/posts/**").permitAll()
@@ -107,6 +108,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                                 .pathMatchers("/api/social/open/**").permitAll()
                                 .pathMatchers("/api/social/communities/**").permitAll()
                                 .pathMatchers("/api/social/posts/public").permitAll()
+
                                 .pathMatchers("/api/social/public").permitAll()
                                 .pathMatchers("/api/auth/private").access(this::isRoleUser)
                                 .pathMatchers("/api/v1/social/users/public").permitAll()

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.dating.app.social.models.Community;
+import vn.dating.app.social.models.eenum.UserCommunityType;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,5 +24,18 @@ public interface CommunityRepository extends JpaRepository<Community, Long> {
             "INNER JOIN user_community uc ON c.id = uc.community_id " +
             "WHERE uc.user_id = :userId", nativeQuery = true)
     Page<Community> findCommunitiesByMemberUserId(@Param("userId") String userId, Pageable pageable);
+
+
+    @Query(value = "SELECT c.* FROM Community c " +
+            "INNER JOIN user_community uc ON c.id = uc.community_id " +
+            "WHERE uc.user_id = :userId AND uc.status = :status", nativeQuery = true)
+    Page<Community> findCommunitiesByMemberUserIdAndStatus(
+            @Param("userId") String userId, @Param("status") String status, Pageable pageable);
+//    @Query(value = "SELECT c.* FROM Community c " +
+//            "INNER JOIN user_community uc ON c.id = uc.community_id " +
+//            "WHERE uc.user_id = :userId", countQuery = "SELECT COUNT(*) FROM Community c " +
+//            "INNER JOIN user_community uc ON c.id = uc.community_id " +
+//            "WHERE uc.user_id = :userId AND  uc.status = :status", nativeQuery = true)
+//    Page<Community> findCommunitiesByMemberUserIdAndStatus(@Param("userId") String userId, @Param("status") UserCommunityType status, Pageable pageable);
 
 }

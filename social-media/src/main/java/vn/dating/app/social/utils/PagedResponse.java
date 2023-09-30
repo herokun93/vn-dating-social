@@ -3,7 +3,7 @@ package vn.dating.app.social.utils;
 import java.util.List;
 
 public class PagedResponse<T> {
-    private List<T> content;
+    private List<T> data;
     private int page;
     private int size;
     private long totalElements;
@@ -14,8 +14,8 @@ public class PagedResponse<T> {
 
     }
 
-    public PagedResponse(List<T> content, int page, int size, long totalElements, int totalPages, boolean last) {
-        this.content = content;
+    public PagedResponse(List<T> comments, int page, int size, long totalElements, int totalPages, boolean last) {
+        this.data = comments;
         this.page = page;
         this.size = size;
         this.totalElements = totalElements;
@@ -23,12 +23,12 @@ public class PagedResponse<T> {
         this.last = last;
     }
 
-    public List<T> getContent() {
-        return content;
+    public List<T> getData() {
+        return data;
     }
 
-    public void setContent(List<T> content) {
-        this.content = content;
+    public void setData(List<T> data) {
+        this.data = data;
     }
 
     public int getPage() {

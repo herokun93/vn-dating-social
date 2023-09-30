@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.dating.app.social.models.Post;
+import vn.dating.app.social.models.eenum.PostStatus;
 
+import javax.persistence.Converter;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +22,23 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 //    @Query("SELECT * FROM Post p WHERE p.community_id IN (SELECT id FROM Community WHERE name = ?) ORDER BY p.created_at DESC")
     Page<Post> findByCommunityNameOrderByCreatedAtDesc(@Param("communityName") String communityName, Pageable pageable);
+
+//    @Query("SELECT p FROM Post p WHERE p.community.name = :communityName AND p.type = :type ORDER BY p.createdAt DESC")
+//    Page<Post> findByCommunityNameAndStateOrderByCreatedAtDesc(@Param("communityName") String communityName, @Param("state") PostStatus type, Pageable pageable);
+
+
+//    @Query("SELECT p FROM Post p WHERE p.community.name = :communityName AND p.state = :state ORDER BY p.createdAt DESC")
+    Page<Post> findByCommunityNameAndStateOrderByCreatedAtDesc(@Param("communityName") String communityName, @Param("state")PostStatus state , Pageable pageable);
+
+
+    @Query("SELECT p FROM Post p WHERE p.url = :url AND p.community.name = :communityName")
+    Post findByUrlAndCommunityName(@Param("url") String url, @Param("communityName") String communityName);
+
+//    @Query("SELECT p FROM Post p WHERE p.url = :url AND p.community.name = :communityName")
+    Post findByUrlAndCommunityNameAndState(@Param("url") String url, @Param("communityName") String communityName,PostStatus status);
+
+    Post findByUrlAndAndState(@Param("url") String url,PostStatus status);
+
 
 
     Optional<Post> findByUrl(String url);

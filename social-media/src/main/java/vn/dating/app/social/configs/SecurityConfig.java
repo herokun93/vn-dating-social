@@ -34,11 +34,14 @@ class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http.cors().and().csrf().disable();
         http.authorizeRequests()
 
                 .antMatchers("/api/social/posts/public").permitAll()
                 .antMatchers("/api/social/posts/upload/**").permitAll()
                 .antMatchers("/api/social/posts/**").permitAll()
+
                 .antMatchers("/api/social/comments/**").permitAll()
                 .antMatchers("/api/social/media/**").permitAll()
                 .antMatchers("/api/social/communities/**").permitAll()

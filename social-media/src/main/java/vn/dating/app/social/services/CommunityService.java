@@ -19,10 +19,9 @@ import vn.dating.app.social.models.eenum.UserCommunityType;
 import vn.dating.app.social.repositories.CommunityRepository;
 import vn.dating.app.social.repositories.UserCommunityRepository;
 import vn.dating.app.social.repositories.UserRepository;
-import vn.dating.common.community.OderCommunity;
+import vn.dating.common.community.OtherCommunity;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -50,7 +49,9 @@ public class CommunityService {
         community.setCreator(user);
         community.setDescription(communityNewDto.getDescription());
         community.setType(communityNewDto.getType());
-        community.setApproval(communityNewDto.isApproval());
+
+
+
         community.setAuth(creatorId);
         community.setAvatar(avatar);
 
@@ -58,7 +59,7 @@ public class CommunityService {
         UserCommunity userCommunity = new UserCommunity();
         userCommunity.setUser(user);
         userCommunity.setCommunity(community);
-        userCommunity.setType(UserCommunityType.ACTIVATED);
+        userCommunity.setStatus(UserCommunityType.ACTIVATED);
         userCommunity.setRole(UserCommunityRoleType.ADMIN);
         userCommunity.setAuth(creatorId);
 
@@ -90,7 +91,17 @@ public class CommunityService {
         // Implement the logic to fetch communities created by the user based on creatorId
 
 
-        Page<Community> communityPage = communityRepository.findCommunitiesByMemberUserId( userId,  pageable);
+        Page<Community> communityPage = communityRepository.findCommunitiesByMemberUserIdAndStatus( userId, UserCommunityType.ACTIVATED.toString(), pageable);
+        CommunityPageDto communityPageDto = new CommunityPageDto(communityPage);
+        return communityPageDto;
+    }
+
+    public CommunityPageDto findCommunitiesByMemberUserIdAndType(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        // Implement the logic to fetch communities created by the user based on creatorId
+
+
+        Page<Community> communityPage = communityRepository.findCommunitiesByMemberUserIdAndStatus( userId, UserCommunityType.ACTIVATED.toString(), pageable);
         CommunityPageDto communityPageDto = new CommunityPageDto(communityPage);
         return communityPageDto;
     }
@@ -100,8 +111,8 @@ public class CommunityService {
 
         CommunitiesOtherDto communitiesOtherDto = new CommunitiesOtherDto();
 
-        for(int index = 0; index< OderCommunity.getList().size(); index++){
-            Community community = communityRepository.findByName(OderCommunity.getList().get(index)).get();
+        for(int index = 0; index< OtherCommunity.getList().size(); index++){
+            Community community = communityRepository.findByName(OtherCommunity.getList().get(index)).get();
             communitiesOtherDto.getData().add(new CommunityOtherBase(community));
         }
         return communitiesOtherDto;

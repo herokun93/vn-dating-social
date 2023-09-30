@@ -19,6 +19,7 @@ import vn.dating.common.dto.CreateUserDto;
 
 import java.security.Principal;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class AuthService {
@@ -31,7 +32,21 @@ public class AuthService {
 
     public User createUserSocial(CreateUserDto createUserDto){
         User user = new User();
+
+        Random random = new Random();
+        int randomNumber = random.nextInt(7) + 1; // Generates a random number between 0 and 7, then adds 1
+        System.out.println("Random number between 1 and 10: " + randomNumber);
+        String avatar = "cat"+randomNumber+".jpeg";
+
+        user.setId(createUserDto.getId());
+        user.setEmail(createUserDto.getEmail());
+        user.setUsername(createUserDto.getUsername());
+        user.setLastName(createUserDto.getLastName());
+        user.setFirstName(createUserDto.getFirstName());
+        user.setAuth(createUserDto.getId());
+        user.setAvatar(avatar);
         User savedUser = userRepository.save(user);;
+
         return  savedUser;
     }
     public User getCurrentUserById(Principal principal) throws UserNotFoundException {

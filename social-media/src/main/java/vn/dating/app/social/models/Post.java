@@ -9,6 +9,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.validator.constraints.Length;
 import vn.dating.app.social.models.eenum.PostStatus;
 import vn.dating.app.social.models.eenum.PostType;
+import vn.dating.app.social.repositories.ennum.PostStatusConverter;
 import vn.dating.common.models.audit.DateAudit;
 
 import javax.persistence.*;
@@ -58,19 +59,16 @@ public class Post extends DateAudit {
     @Enumerated(EnumType.STRING)
     private PostType type;
 
+
     @Enumerated(EnumType.STRING)
     private PostStatus state;
+
 
     boolean anonymous;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "community_id")
     private Community community;
-
-
-
-
-
 
     @PrePersist
     public void prePersist() {
