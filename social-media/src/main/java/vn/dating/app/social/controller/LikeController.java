@@ -88,4 +88,44 @@ public class LikeController {
            );
        }
     }
+
+    @PostMapping("/post/delete")
+    public ResponseEntity<ResponseObject>  deleteLikePost( @Valid @RequestBody LikeNewPostDto likeNewPostDto,
+                                                           Principal principal) {
+
+        User user = authService.getCurrentUserById(principal);
+
+        Post post = postService.findByUrlAndAndState(likeNewPostDto.getPostUrl());
+
+        if(post==null){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.NOT_FOUND,"Post not exist Or not accept")
+            );
+        }
+
+        boolean isMember = userCommunityService.isUserMemberOfSameCommunity(principal.getName(), likeNewPostDto.getPostUrl());
+
+        if(!isMember){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.NOT_MEMBER,"Not member")
+            );
+        }
+
+
+        Like liked = likeService.findByUserIdAndPostUrl(user.getId(), likeNewPostDto.getPostUrl());
+
+        if(liked!=null){
+            liked.setReact(likeNewPostDto.getReact());
+            likeService.deleteLike(liked);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.SUCCESSFUL,"Deleted")
+            );
+
+        }else{
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", ResponseMessage.SUCCESSFUL,"Deleted")
+            );
+        }
+    }
 }
+

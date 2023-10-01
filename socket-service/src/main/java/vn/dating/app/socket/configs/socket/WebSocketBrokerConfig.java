@@ -14,7 +14,10 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -42,17 +45,24 @@ public class WebSocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
                 StompHeaderAccessor accessor =
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    List<String> authorization = accessor.getNativeHeader("Authorization");
+//                    List<String> authorization = accessor.getNativeHeader("Authorization");
+//
+//                    if(authorization !=null){
+//
+//                        String token = "";
+//                        for(int i=0;i<authorization.size();i++){
+//                            if(authorization.get(i).indexOf("Bearer ")>-1) {
+//
+//                            }
+//                        }
+//                    }
 
-                    if(authorization !=null){
+                    String userId = UUID.randomUUID().toString();
 
-                        String token = "";
-                        for(int i=0;i<authorization.size();i++){
-                            if(authorization.get(i).indexOf("Bearer ")>-1) {
+                    Principal principal = new Principal() {@Override
+                    public String getName() {return userId;}};
 
-                            }
-                        }
-                    }
+                    accessor.setUser(principal);
                 }
                 return message;
             }

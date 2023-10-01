@@ -20,13 +20,10 @@
         <module>discovery-server</module>
         <module>api-gateway</module>
         <module>social-medial</module>
-        <module>chat-service</module>
         <module>dating-telegram</module>
         <module>common</module>
-        <module>auth-service</module>
         <module>social-media</module>
         <module>socket-service</module>
-        <module>keyloak-service</module>
     </modules>
 
     <properties>

@@ -20,6 +20,10 @@ public class LikeService {
         return likeRepository.save(like);
     }
 
+    public void deleteLike(Like like){
+        likeRepository.delete(like);
+    }
+
     public Like findByUserIdAndPostUrl(String userId,String postUrl){
         return likeRepository.findByUserIdAndPostUrl(userId,postUrl);
     }
