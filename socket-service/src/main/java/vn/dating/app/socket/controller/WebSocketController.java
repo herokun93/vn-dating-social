@@ -1,6 +1,7 @@
 package vn.dating.app.socket.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -9,10 +10,14 @@ import org.springframework.stereotype.Controller;
 import vn.dating.app.socket.dto.Message;
 import vn.dating.app.socket.dto.PrivateMessage;
 import vn.dating.app.socket.dto.PublicMessage;
+import vn.dating.app.socket.service.KafkaService;
 
 @Controller
 @Slf4j
 public class WebSocketController {
+
+    @Autowired
+    private KafkaService kafkaService;
 
 
     @MessageMapping("/public-messages") // This is the endpoint the client sends messages to
@@ -21,6 +26,7 @@ public class WebSocketController {
         log.info("handlePublicMessage");
         log.info(headerAccessor.getSessionId());
         log.info(message.toString());
+        kafkaService.sendMessage();
         return message;
     }
 

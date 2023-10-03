@@ -18,6 +18,7 @@ public class WebSocketSecurityConfig extends AbstractSecurityWebSocketMessageBro
                 .simpSubscribeDestMatchers("/user/queue/errors").permitAll()
 
                 .simpDestMatchers("/ws/**").permitAll()
+                .simpDestMatchers("/topic/**").permitAll()
 
                 .simpSubscribeDestMatchers("/ws/**","/user/**", "/topic/**","/queue/**").permitAll()
 

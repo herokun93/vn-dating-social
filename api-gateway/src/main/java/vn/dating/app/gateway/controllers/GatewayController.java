@@ -47,8 +47,12 @@ public class GatewayController {
 
     @GetMapping("/private")
     @ResponseStatus(HttpStatus.OK)
-    public String getPrivate(){
-        return "gateway-private";
+    public String getPrivate( Principal principal){
+        if(principal==null){
+            return "gateway-private is null";
+        }
+
+        return "gateway-private" + principal.getName();
     }
 
 

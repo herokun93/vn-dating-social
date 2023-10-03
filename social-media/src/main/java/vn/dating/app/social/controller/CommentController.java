@@ -47,6 +47,11 @@ public class CommentController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private KafkaService kafkaService;
+
+
+
     @PostMapping(value ="/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseObject> createComment(Principal principal,
                                                 @RequestPart("file") MultipartFile file,
@@ -55,6 +60,9 @@ public class CommentController {
                                                                 message = "Anonymous must be 'true' or 'false'") String anonymous,
                                                 @RequestPart("content") @NotBlank(message = "Title must not be blank")
                                                     @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String content) {
+
+        log.info("New comment");
+        kafkaService.sendMessage();
 
         User user = authService.getCurrentUserById(principal);
         boolean isAnonymous = Boolean.parseBoolean(anonymous);
@@ -94,6 +102,10 @@ public class CommentController {
                                                                 message = "Anonymous must be 'true' or 'false'") String anonymous,
                                                         @RequestPart("content") @NotBlank(message = "Title must not be blank")
                                                         @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters") String content) {
+
+
+        log.info("New comment");
+        kafkaService.sendMessage();
 
         User user = authService.getCurrentUserById(principal);
 

@@ -1,4 +1,4 @@
-package vn.dating.app.socket;
+package vn.dating.app.message;
 
 
 import org.springframework.boot.SpringApplication;
@@ -9,10 +9,10 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableEurekaClient
-public class SocketApplication {
+public class MessageApplication {
     public static void main(String[] args) {
 
-        SpringApplication.run(SocketApplication.class, args);
+        SpringApplication.run(MessageApplication.class, args);
     }
     @Bean
     public RestTemplate restTemplate() {

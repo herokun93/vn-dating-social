@@ -6,12 +6,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 
-@Getter
-@Setter
-@ToString
+
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class CreateUserDto {
     private String id;
 

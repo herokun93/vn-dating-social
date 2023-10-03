@@ -7,6 +7,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import vn.dating.app.gateway.models.social.User;
 import vn.dating.app.gateway.services.AuthService;
+import vn.dating.app.gateway.services.KafkaService;
 import vn.dating.common.dto.CreateUserDto;
 import vn.dating.common.response.CreateAuthResponse;
 
@@ -21,6 +23,7 @@ import javax.validation.Valid;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 
 
 @Slf4j
@@ -32,36 +35,55 @@ public class AuthController {
     private AuthService authService;
     private final WebClient webClient;
 
+
+    private final  KafkaService kafkaService;
+
     @Value("${upload.directory}")
     private String UPLOAD_DIR;
 
     private final String SOCIAL_AUTH_CREATE = "http://localhost:2007";
     @Autowired
-    public AuthController(AuthService authService, WebClient.Builder webClientBuilder) {
+    public AuthController(AuthService authService, WebClient.Builder webClientBuilder, KafkaService kafkaService) {
         this.authService = authService;
         this.webClient = webClientBuilder.baseUrl(SOCIAL_AUTH_CREATE).build();
+        this.kafkaService = kafkaService;
+    }
+
+    @GetMapping("/current")
+    @ResponseStatus(HttpStatus.OK)
+    public String getPrivate( Principal principal){
+        if(principal==null){
+            return "gateway-private is null";
+        }
+
+        return  principal.getName();
     }
 
 
 
     @PostMapping("/create")
     public ResponseEntity<CreateAuthResponse> createUser(@Valid @RequestBody CreateUserDto createUserDto){
-        User saveUser = authService.createGatewayUser(createUserDto);
+
+        kafkaService.createUserMessage(createUserDto);
+        kafkaService.createUserSocial(createUserDto);
+        kafkaService.createUserSocket(createUserDto);
+
+//        User saveUser = authService.createGatewayUser(createUserDto);
         log.info("Create new user");
 
 //        WebClient client = WebClient.builder()
 //                .baseUrl(SOCIAL_AUTH_CREATE)
 //                .build();
 
-         CreateAuthResponse createAuthResponse = webClient.post()
-                .uri("/api/social/auth/create")
-                .body(Mono.just(createUserDto), CreateUserDto.class)
-                .retrieve()
-                .bodyToMono(CreateAuthResponse.class)
-                .block(); // Blocking approach for demonstration
+//         CreateAuthResponse createAuthResponse = webClient.post()
+//                .uri("/api/social/auth/create")
+//                .body(Mono.just(createUserDto), CreateUserDto.class)
+//                .retrieve()
+//                .bodyToMono(CreateAuthResponse.class)
+//                .block(); // Blocking approach for demonstration
 
 
-        if(saveUser==null)   return ResponseEntity.badRequest().body(new CreateAuthResponse("Cannot save user", "GATEWAY"));
+//        if(saveUser==null)   return ResponseEntity.badRequest().body(new CreateAuthResponse("Cannot save user", "GATEWAY"));
 
         return ResponseEntity.ok().body(new CreateAuthResponse("User created, data saved, and API called", "SOCIAL"));
     }
